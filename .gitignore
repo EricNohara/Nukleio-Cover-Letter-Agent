@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# Optional: lock files if you want (some teams include them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Coverage (if you run tests)
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js build output (if integrating Next.js locally)
+.next/
+out/
