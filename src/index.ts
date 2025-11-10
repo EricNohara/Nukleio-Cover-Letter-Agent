@@ -35,16 +35,20 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const userId = input.userId;
 
     // fetch the user from nukleio
-    const res = await fetch(`${NUKLEIO_BASE_URL}?X-Target-User-Id=${userId}`, {
+    const res = await fetch(NUKLEIO_BASE_URL, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${NUKLEIO_API_KEY}`,
+        "X-Target-User-Id": userId,
         "Content-Type": "application/json",
       },
     });
 
     if (!res.ok) {
-      throw new Error("Failed to fetch user data from Nukleio");
+      const errText = await res.text();
+      throw new Error(
+        `Failed to fetch nukleio user data: ${res.status} - ${errText}`
+      );
     }
 
     const data = await res.json();
