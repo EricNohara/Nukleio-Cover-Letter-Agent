@@ -37,6 +37,6 @@ jobs:
           function_name: Nukleio-Cover-Letter-Agent
           zip_file: function.zip
           runtime: nodejs20.x
-          handler: index.handler
+          handler: dist/index.handler
           memory_size: 1024
           timeout: 900
