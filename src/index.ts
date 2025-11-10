@@ -34,10 +34,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // get the user id
     const userId = input.userId;
 
-    console.log(userId);
-    console.log(NUKLEIO_API_KEY);
-    console.log(NUKLEIO_BASE_URL);
-
     // fetch the user from nukleio
     const res = await fetch(NUKLEIO_BASE_URL, {
       method: "GET",
