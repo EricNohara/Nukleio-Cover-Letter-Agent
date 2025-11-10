@@ -45,9 +45,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     });
 
     if (!res.ok) {
-      const errText = await res.text();
+      const err: any = await res.json();
       throw new Error(
-        `Failed to fetch nukleio user data: ${res.status} - ${errText}`
+        `Failed to fetch nukleio user data: ${res.status} - ${err.message}`
       );
     }
 
