@@ -1,4 +1,6 @@
-import { writingAnalysisAgent } from "../agents/writingAnalysisAgent";
+import writingAnalysisAgent from "../agents/writingAnalysisAgent";
+import OpenAI from "openai";
+import getOpenAIClient from "../utils/getOpenAIClient";
 
 const sample = `
 (Wake up, F1LTHY)
@@ -32,7 +34,8 @@ And I got your ho on her knees, 'cause she know she just met the Lord
 `;
 
 async function runAnalysis() {
-  const result = await writingAnalysisAgent(sample);
+  const clientOpenAI: OpenAI = getOpenAIClient();
+  const result = await writingAnalysisAgent(clientOpenAI, sample);
   console.log(result);
 }
 
