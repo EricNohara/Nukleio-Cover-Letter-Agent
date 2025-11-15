@@ -24,8 +24,9 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Zip Lambda code
+      - name: Prepare deployment package
         run: |
+          npm ci --omit=dev
           mkdir package
           cp -r dist/* package/
           cp package.json package/
