@@ -26,7 +26,12 @@ jobs:
 
       - name: Zip Lambda code
         run: |
-          zip -r function.zip dist node_modules package.json
+          mkdir package
+          cp -r dist/* package/
+          cp package.json package/
+          cp -r node_modules package/
+          cd package
+          zip -r ../function.zip .
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
