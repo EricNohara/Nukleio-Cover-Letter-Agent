@@ -38,5 +38,5 @@ jobs:
           zip_file: function.zip
           runtime: nodejs20.x
           handler: dist/index.handler
-          memory_size: 1024
+          memory_size: 1536
           timeout: 900
