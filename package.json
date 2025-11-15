@@ -12,10 +12,12 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@sparticuz/chromium": "^141.0.0",
     "@types/aws-lambda": "^8.10.157",
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.0",
     "@types/puppeteer": "^5.4.7",
+    "puppeteer-core": "^24.30.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
