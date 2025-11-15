@@ -22,9 +22,14 @@
     "@aws-sdk/client-s3": "^3.927.0",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "langchain": "^1.0.3",
     "openai": "^6.8.1",
+    "stopwords": "^0.0.9",
+    "text-readability": "^1.1.1",
+    "wink-eng-lite-web-model": "^1.8.1",
+    "wink-nlp": "^2.4.0",
     "zod": "^4.1.12"
   }
 }

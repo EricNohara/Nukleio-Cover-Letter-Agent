@@ -1,10 +1,8 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { z } from "zod";
 import { runPipeline } from "./pipeline";
-
-// get nukleio env variables
-const NUKLEIO_API_KEY = process.env.NUKLEIO_API_KEY!;
-const NUKLEIO_BASE_URL = process.env.NUKLEIO_BASE_URL!;
+import getUserData from "./utils/getUserData";
+import { userInfo } from "os";
 
 // use zod to validate input JSON
 const inputSchema = z.object({
@@ -22,7 +20,7 @@ const inputSchema = z.object({
   //     message: "Invalid URL",
   //   }
   // ),
-  // writingSample: z.string().optional(),
+  writingSample: z.string().optional(),
 });
 
 // main entrypoint for AWS lambda function
@@ -33,41 +31,23 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // get the user id
     const userId = input.userId;
-
-    // fetch the user from nukleio
-    const res = await fetch(NUKLEIO_BASE_URL, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${NUKLEIO_API_KEY}`,
-        "X-Target-User-Id": userId,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      const err: any = await res.json();
-      throw new Error(
-        `Failed to fetch nukleio user data: ${res.status} - ${err.message}`
-      );
-    }
-
-    const data = await res.json();
+    const userData = await getUserData(userId);
 
     // return the data for now
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        userData: data,
-      }),
-    };
+    // return {
+    //   statusCode: 200,
+    //   body: JSON.stringify({
+    //     success: true,
+    //     userData: data,
+    //   }),
+    // };
 
     // const result = await runPipeline(input);
 
-    // return {
-    //   statusCode: 200,
-    //   body: JSON.stringify({ success: true, result }),
-    // };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true }),
+    };
   } catch (err: any) {
     console.error(err);
     return {
