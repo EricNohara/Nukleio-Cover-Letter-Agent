@@ -1,25 +1,24 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
 import { z } from "zod";
+import { APIGatewayProxyHandler } from "aws-lambda";
 import { runPipeline } from "./pipeline";
-import getUserData from "./utils/getUserData";
-import { userInfo } from "os";
+import scrapeJobPosting from "./utils/web/scrapeJobPosting";
 
 // use zod to validate input JSON
 const inputSchema = z.object({
-  userId: z.string().min(1, "userId is required"),
-  // jobUrl: z.string().refine(
-  //   (val) => {
-  //     try {
-  //       new URL(val);
-  //       return true;
-  //     } catch {
-  //       return false;
-  //     }
-  //   },
-  //   {
-  //     message: "Invalid URL",
-  //   }
-  // ),
+  // userId: z.string().min(1, "userId is required"),
+  jobUrl: z.string().refine(
+    (val) => {
+      try {
+        new URL(val);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Invalid URL",
+    }
+  ),
   writingSample: z.string().optional(),
 });
 
@@ -29,24 +28,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const body = JSON.parse(event.body || "{}");
     const input = inputSchema.parse(body);
 
-    // get the user id
-    const userId = input.userId;
-    const userData = await getUserData(userId);
-
-    // return the data for now
-    // return {
-    //   statusCode: 200,
-    //   body: JSON.stringify({
-    //     success: true,
-    //     userData: data,
-    //   }),
-    // };
-
+    // invoke the agentic pipeline
     // const result = await runPipeline(input);
 
+    const result = await scrapeJobPosting(input.jobUrl);
+
+    // return the outputted PDF from pipeline
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ success: true, result: result }),
     };
   } catch (err: any) {
     console.error(err);

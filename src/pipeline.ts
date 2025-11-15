@@ -1,37 +1,41 @@
-import OpenAI from "openai";
+import getUserData from "./utils/getUserData";
+import writingAnalysisAgent from "./agents/writingAnalysisAgent";
+import { WritingAnalysis } from "./utils/writing/writingSchema";
+import getOpenAIClient from "./utils/getOpenAIClient";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-
+// pipeline for agentic workflow
 export async function runPipeline({
-  email,
+  userId,
   jobUrl,
   writingSample,
 }: {
-  email: string;
+  userId: string;
   jobUrl: string;
   writingSample?: string | undefined;
 }) {
-  // Example: get user data from your Next.js app
-  const userData = await fetch(
-    `${process.env.NEXT_API_URL}/api/user?email=${email}`,
-    {
-      headers: { Authorization: `Bearer ${process.env.INTERNAL_API_KEY}` },
-    }
-  ).then((res) => res.json());
+  // get OpenAI Client
+  const clientOpenAI = getOpenAIClient();
 
-  // Simple example agent call
-  const completion = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a cover letter generator." },
-      {
-        role: "user",
-        content: `User data: ${JSON.stringify(
-          userData
-        )}\nJob link: ${jobUrl}\nWriting sample: ${writingSample}`,
-      },
-    ],
-  });
+  // retrieve user data
+  const userData = await getUserData(userId);
 
-  return completion.choices[0]?.message?.content;
+  // invoke job research agent
+
+  // invoke writing analysis agent
+  const writingAnalysis: WritingAnalysis | null = writingSample
+    ? await writingAnalysisAgent(clientOpenAI, writingSample)
+    : null;
+
+  // invoke cover letter first draft agent
+
+  let isDraftGoodEnough = false;
+  do {
+    // invoke draft evaluator agent
+    // update isDraftGoodEnough
+    // invoke redraft agent
+  } while (!isDraftGoodEnough);
+
+  // format the draft as a pdf
+
+  // return the pdf file
 }

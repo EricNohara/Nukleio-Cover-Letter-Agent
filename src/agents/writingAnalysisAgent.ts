@@ -1,20 +1,17 @@
-import OpenAI from "openai";
 import {
   writingAnalysisSchema,
   WritingAnalysis,
   QuantitativeMetrics,
   QualitativeMetrics,
   qualitativeSchema,
-} from "../utils/writingSchema";
-import { analyzeWritingQualitative } from "../utils/textMetrics";
+} from "../utils/writing/writingSchema";
+import { analyzeWritingQualitative } from "../utils/writing/textMetrics";
 import "dotenv/config";
 import cleanLLMOutput from "../utils/cleanLLMResponse";
+import OpenAI from "openai";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
-
-export async function writingAnalysisAgent(
+export default async function writingAnalysisAgent(
+  clientOpenAI: OpenAI,
   sample: string
 ): Promise<WritingAnalysis> {
   if (!sample.trim()) {
@@ -58,7 +55,7 @@ export async function writingAnalysisAgent(
   const quantMetrics: QuantitativeMetrics = analyzeWritingQualitative(sample);
 
   // qualitative analysis
-  const response = await client.chat.completions.create({
+  const response = await clientOpenAI.chat.completions.create({
     model: "gpt-4.1-mini",
     messages: [{ role: "user", content: prompt }],
     temperature: 0,
