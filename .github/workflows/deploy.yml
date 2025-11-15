@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install runtime dependencies only
-        run: npm ci --omit=dev
+        run: npm ci
 
       - name: Build TypeScript
         run: npm run build
