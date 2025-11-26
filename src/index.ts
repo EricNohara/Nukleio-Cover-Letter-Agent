@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { runPipeline } from "./pipeline";
-import scrapeJobPosting from "./utils/web/scrapeJobPosting";
+// import { runPipeline } from "./pipeline";
+// import scrapeJobPosting from "./utils/web/scrapeJobPosting";
+import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 
 // use zod to validate input JSON
 const inputSchema = z.object({
@@ -19,6 +20,8 @@ const inputSchema = z.object({
       message: "Invalid URL",
     }
   ),
+  jobTitle: z.string().optional(),
+  companyName: z.string().optional(),
   writingSample: z.string().optional(),
 });
 
@@ -31,7 +34,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // invoke the agentic pipeline
     // const result = await runPipeline(input);
 
-    const result = await scrapeJobPosting(input.jobUrl);
+    // const result = await scrapeJobPosting(input.jobUrl);
+    const result = await extractJobFromUrl(
+      input.jobUrl,
+      input.jobTitle,
+      input.companyName
+    );
 
     // return the outputted PDF from pipeline
     return {
