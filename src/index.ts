@@ -20,8 +20,8 @@ const inputSchema = z.object({
       message: "Invalid URL",
     }
   ),
-  jobTitle: z.string().optional(),
-  companyName: z.string().optional(),
+  jobTitle: z.string(),
+  companyName: z.string(),
   writingSample: z.string().optional(),
 });
 

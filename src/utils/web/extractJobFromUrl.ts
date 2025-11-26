@@ -37,8 +37,8 @@ function jobMatches(job: any, targetUrl: string): boolean {
 
 export async function extractJobFromUrl(
   jobUrl: string,
-  jobTitle?: string,
-  companyName?: string
+  jobTitle: string,
+  companyName: string
 ): Promise<ExtractedJob | null> {
   const apiKey = process.env.THEIRSTACK_API_KEY;
   if (!apiKey) throw new Error("Missing THEIRSTACK_API_KEY");
@@ -55,21 +55,13 @@ export async function extractJobFromUrl(
 
   /* ----------- ADD SEARCH FILTERS ----------- */
 
-  // If job title provided → use it
-  if (jobTitle) {
-    filters.job_title_or = [jobTitle];
-    console.log("📌 Using job title filter:", jobTitle);
-  }
+  filters.job_title_or = [jobTitle];
+  console.log("📌 Using job title filter:", jobTitle);
 
-  // If company provided → use exact match first
-  if (companyName) {
-    filters.company_name_case_insensitive_or = [companyName];
-    console.log("🏢 Using exact company name filter:", companyName);
-
-    // ALSO add a fallback partial match
-    filters.company_name_partial_match_or = [companyName];
-    console.log("🔍 Added partial company name filter:", companyName);
-  }
+  filters.company_name_case_insensitive_or = [companyName];
+  console.log("🏢 Using exact company name filter:", companyName);
+  filters.company_name_partial_match_or = [companyName];
+  console.log("🔍 Added partial company name filter:", companyName);
 
   // Domain handling
   if (domain.includes("linkedin")) {
@@ -132,30 +124,32 @@ export async function extractJobFromUrl(
 
   /* ---------------- MATCH BY JOB TITLE ---------------- */
 
-  if (jobTitle) {
-    const nt = normalize(jobTitle);
-    const match = results.find((j: any) => normalize(j.job_title).includes(nt));
-    if (match) {
-      console.log("✅ Matched by job title");
-      return { job: match, company: match.company_object, matchType: "title" };
-    }
+  const nt = normalize(jobTitle);
+  const titleMatch = results.find((j: any) =>
+    normalize(j.job_title).includes(nt)
+  );
+  if (titleMatch) {
+    console.log("✅ Matched by job title");
+    return {
+      job: titleMatch,
+      company: titleMatch.company_object,
+      matchType: "title",
+    };
   }
 
   /* ---------------- MATCH BY COMPANY NAME ---------------- */
 
-  if (companyName) {
-    const nc = normalize(companyName);
-    const match = results.find((j: any) =>
-      normalize(j.company_object?.name).includes(nc)
-    );
-    if (match) {
-      console.log("✅ Matched by company name");
-      return {
-        job: match,
-        company: match.company_object,
-        matchType: "company",
-      };
-    }
+  const nc = normalize(companyName);
+  const companyMatch = results.find((j: any) =>
+    normalize(j.company_object?.name).includes(nc)
+  );
+  if (companyMatch) {
+    console.log("✅ Matched by company name");
+    return {
+      job: companyMatch,
+      company: companyMatch.company_object,
+      matchType: "company",
+    };
   }
 
   /* ---------------- NO MATCH ---------------- */

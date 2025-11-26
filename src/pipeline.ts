@@ -2,15 +2,20 @@ import getUserData from "./utils/getUserData";
 import writingAnalysisAgent from "./agents/writingAnalysisAgent";
 import { WritingAnalysis } from "./utils/writing/writingSchema";
 import getOpenAIClient from "./utils/getOpenAIClient";
+import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 
 // pipeline for agentic workflow
 export async function runPipeline({
   userId,
   jobUrl,
+  jobTitle,
+  companyName,
   writingSample,
 }: {
   userId: string;
   jobUrl: string;
+  jobTitle: string;
+  companyName: string;
   writingSample?: string | undefined;
 }) {
   // get OpenAI Client
@@ -20,6 +25,7 @@ export async function runPipeline({
   const userData = await getUserData(userId);
 
   // invoke job research agent
+  const jobData = await extractJobFromUrl(jobUrl, jobTitle, companyName);
 
   // invoke writing analysis agent
   const writingAnalysis: WritingAnalysis | null = writingSample
