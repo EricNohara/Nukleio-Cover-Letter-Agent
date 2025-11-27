@@ -58,11 +58,13 @@ export async function runPipeline({
   );
 
   let isDraftGoodEnough = true;
+  let iterationCount = 0;
+  const maxIterations = 3;
   do {
     // invoke draft evaluator agent
     // update isDraftGoodEnough
     // invoke redraft agent
-  } while (!isDraftGoodEnough);
+  } while (!isDraftGoodEnough && iterationCount < maxIterations);
 
   return firstDraft;
 }

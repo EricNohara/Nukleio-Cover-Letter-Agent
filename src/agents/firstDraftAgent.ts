@@ -25,6 +25,7 @@ function generatePromptWithWritingAnalysis(
     6. User's full name as a sign off/signature
 
     **Requirements:**
+    - Must be 250 - 400 words. DO NOT EXCEED THIS!
     - Reflect the user's actual background, education, experiences, and projects
     - Map user skills and technologies directly to those specified in the job
     - Personalize the letter
@@ -32,7 +33,8 @@ function generatePromptWithWritingAnalysis(
     - Include slight imperfections 
     - Vary sentence length heavily 
     - Add subtle emotional nuance 
-    - Avoid overly formal, rigid, or generic phrases
+    - Avoid overly formal, rigid, or generic cliche phrases
+    - If discussing course work, DO NOT include the course's name - only a breif description of the content
 
     **Output:**
     - Output a single, fully formatted business cover letter in plain text. 
@@ -56,7 +58,7 @@ function generatePromptWithWritingAnalysis(
     ${JSON.stringify(writingAnalysis, null, 2)}
     \`\`\`
 
-    Output the cover letter as plain text. DO NOT output anything else.`;
+    Output the cover letter as plain text. DO NOT output anything else. Ensure it is 250 - 400 words and follows the specified format.`;
 }
 
 function generatePromptWithoutWritingAnalysis(
@@ -79,6 +81,7 @@ function generatePromptWithoutWritingAnalysis(
     6. User's full name as a sign off/signature
 
     **Requirements:**
+    - Must be 250 - 400 words. DO NOT EXCEED THIS!
     - Reflect the user's actual background, education, experiences, and projects
     - Map user skills and technologies directly to those specified in the job
     - Personalize the letter
@@ -86,7 +89,8 @@ function generatePromptWithoutWritingAnalysis(
     - Include slight imperfections 
     - Vary sentence length heavily 
     - Add subtle emotional nuance 
-    - Avoid overly formal, rigid, or generic phrases
+    - Avoid overly formal, rigid, or generic cliche phrases
+    - If discussing course work, DO NOT include the course's name - only a breif description of the content
 
     **Output:**
     - Output a single, fully formatted business cover letter in plain text. 
@@ -105,7 +109,7 @@ function generatePromptWithoutWritingAnalysis(
     ${JSON.stringify(jobData, null, 2)}
     \`\`\`
 
-    Output the cover letter as plain text. DO NOT output anything else.`;
+    Output the cover letter as plain text. DO NOT output anything else. Ensure it is 250 - 400 words and follows the specified format.`;
 }
 
 export default async function firstDraftAgent(
