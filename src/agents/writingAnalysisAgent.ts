@@ -48,7 +48,9 @@ export default async function writingAnalysisAgent(
   `;
 
   // quantitative analysis
-  const quantMetrics: QuantitativeMetrics = analyzeWritingQualitative(sample);
+  const quantMetrics: QuantitativeMetrics = await analyzeWritingQualitative(
+    sample
+  );
 
   // qualitative analysis
   const response = await clientOpenAI.chat.completions.create({
