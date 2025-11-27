@@ -92,22 +92,39 @@ export async function runPipeline({
     writingAnalysis
   );
 
+  // evaluation feedback loop
   let isDraftGoodEnough = true;
   let iterationCount = 0;
   const maxIterations = 3;
   let draftEvaluation: IDraftEvaluationResult;
+  let currentDraftIteration: string = firstDraft;
   do {
     // invoke draft evaluator agent
     draftEvaluation = await draftEvaluatorAgent(
       clientOpenAI,
       conversationId,
-      firstDraft,
+      currentDraftIteration,
       userData,
       jobData,
       writingAnalysis
     );
 
     // update isDraftGoodEnough
+    const objectivePass =
+      draftEvaluation.objectiveEvaluation.pass &&
+      draftEvaluation.objectiveEvaluation.issues.length === 0;
+
+    const llmPass = draftEvaluation.llmEvaluation.score >= 85;
+
+    const stylePass = draftEvaluation.writingStyleEvaluation
+      ? draftEvaluation.writingStyleEvaluation.deviations.every(
+          (d) => d.severity !== "high"
+        )
+      : true;
+
+    // must pass all 3 metrics
+    isDraftGoodEnough = objectivePass && llmPass && stylePass;
+
     // invoke redraft agent
   } while (!isDraftGoodEnough && iterationCount < maxIterations);
 

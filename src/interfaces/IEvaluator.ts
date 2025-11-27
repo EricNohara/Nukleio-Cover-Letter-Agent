@@ -16,7 +16,20 @@ export interface ILlmEvaluationResult {
   recommendations: string[];
 }
 
+export interface IWritingStyleEvaluationResult {
+  deviations: {
+    metric: string;
+    userValue: number;
+    draftValue: number;
+    difference: number;
+    severity: "low" | "medium" | "high";
+    status: "matches" | "draft_higher" | "draft_lower";
+  }[];
+  summary: string[];
+}
+
 export interface IDraftEvaluationResult {
   objectiveEvaluation: IObjectiveEvaluationResult;
   llmEvaluation: ILlmEvaluationResult;
+  writingStyleEvaluation: IWritingStyleEvaluationResult | null;
 }

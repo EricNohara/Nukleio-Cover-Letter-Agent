@@ -5,7 +5,9 @@ import { quantitativeSchema, QuantitativeMetrics } from "./writingSchema";
 
 // Load text-readability lazily via dynamic import
 async function loadReadability() {
-  return await import("text-readability");
+  // All exported functions are inside the default export
+  const mod = await import("text-readability");
+  return mod.default || mod; // defensive fallback
 }
 
 export async function analyzeWritingQualitative(
@@ -13,6 +15,7 @@ export async function analyzeWritingQualitative(
 ): Promise<QuantitativeMetrics> {
   const rs = await loadReadability();
 
+  // NOW these functions exist
   const wordCount = rs.lexiconCount(text);
   const sentenceCount = rs.sentenceCount(text);
   const totalSyllables = rs.syllableCount(text);
@@ -22,8 +25,8 @@ export async function analyzeWritingQualitative(
   const textStandard = rs.textStandard(text, true);
 
   const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
-
   const stopwordSet = new Set(stopwords);
+
   const stopwordRatio =
     words.filter((w) => stopwordSet.has(w)).length / Math.max(wordCount, 1);
 
