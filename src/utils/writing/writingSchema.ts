@@ -23,10 +23,6 @@ export const qualitativeSchema = z.object({
     structure: z.enum(["simple", "compound", "complex", "mixed"]),
     variedPacing: z.enum(["low", "medium", "high"]),
   }),
-  vocabulary: z.object({
-    distinctiveWords: z.array(z.string()),
-    repeatedPhrases: z.array(z.string()),
-  }),
   cohesion: z.object({
     paragraphLength: z.enum(["short", "medium", "long"]),
     connectors: z.array(z.string()),

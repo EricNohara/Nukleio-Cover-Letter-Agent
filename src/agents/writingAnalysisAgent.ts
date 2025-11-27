@@ -33,10 +33,6 @@ export default async function writingAnalysisAgent(
         "structure": "simple | compound | complex | mixed",
         "variedPacing": "low | medium | high"
       },
-      "vocabulary": {
-        "distinctiveWords": [],  // uncommon or stylistically unique words
-        "repeatedPhrases": []    // common phrases or idioms
-      },
       "cohesion": {
         "paragraphLength": "short | medium | long",
         "connectors": []         // e.g., 'however', 'therefore', 'meanwhile'
@@ -56,7 +52,7 @@ export default async function writingAnalysisAgent(
 
   // qualitative analysis
   const response = await clientOpenAI.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: "gpt-4.1",
     messages: [{ role: "user", content: prompt }],
     temperature: 0,
   });

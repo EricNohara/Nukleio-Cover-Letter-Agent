@@ -6,6 +6,40 @@ import {
   ITheirStackResponse,
 } from "../../interfaces/ITheirStackResponse";
 
+function cleanJob(raw: any): ITheirStackJob {
+  return {
+    url: raw.url,
+    final_url: raw.final_url,
+    source_url: raw.source_url,
+    job_title: raw.job_title,
+    remote: raw.remote,
+    hybrid: raw.hybrid,
+    salary_string: raw.salary_string,
+    seniority: raw.seniority,
+    hiring_team:
+      raw.hiring_team?.map((m: any) => ({
+        full_name: m.full_name,
+        linkedin_url: m.linkedin_url,
+        role: m.role,
+      })) ?? [],
+    employment_statuses: raw.employment_statuses ?? [],
+    technology_slugs: raw.technology_slugs ?? [],
+    description: raw.description,
+    company_object: {
+      name: raw.company_object?.name,
+      industry: raw.company_object?.industry,
+      employee_count: raw.company_object?.employee_count,
+      long_description: raw.company_object?.long_description,
+      city: raw.company_object?.city,
+      company_keywords: raw.company_object?.company_keywords ?? [],
+    },
+    locations:
+      raw.locations?.map((l: any) => ({
+        display_name: l.display_name,
+      })) ?? [],
+  };
+}
+
 const THEIRSTACK_API = "https://api.theirstack.com/v1/jobs/search";
 
 /* ---------------- UTILITIES ---------------- */
@@ -63,32 +97,26 @@ export async function extractJobFromUrl(
     });
 
     if (res.status !== 200) return null;
-
     results = res.data?.data ?? [];
-  } catch (err: any) {
+  } catch {
     return null;
   }
 
   /* ---------------- MATCH BY URL ---------------- */
-
   const exact = results.find((j) => jobMatches(j, jobUrl));
-  if (exact) return exact;
+  if (exact) return cleanJob(exact);
 
   /* ---------------- MATCH BY JOB TITLE ---------------- */
-
   const nt = normalize(jobTitle);
   const titleMatch = results.find((j) => normalize(j.job_title).includes(nt));
-  if (titleMatch) return titleMatch;
+  if (titleMatch) return cleanJob(titleMatch);
 
   /* ---------------- MATCH BY COMPANY NAME ---------------- */
-
   const nc = normalize(companyName);
   const companyMatch = results.find((j) =>
     normalize(j.company_object?.name).includes(nc)
   );
-  if (companyMatch) return companyMatch;
-
-  /* ---------------- NO MATCH ---------------- */
+  if (companyMatch) return cleanJob(companyMatch);
 
   return null;
 }
