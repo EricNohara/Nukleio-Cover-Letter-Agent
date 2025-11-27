@@ -7,7 +7,7 @@ import {
 } from "../utils/writing/writingSchema";
 import { analyzeWritingQualitative } from "../utils/writing/textMetrics";
 import "dotenv/config";
-import cleanLLMOutput from "../utils/cleanLLMResponse";
+import cleanLLMOutput from "../utils/ai/cleanLLMResponse";
 import OpenAI from "openai";
 
 export default async function writingAnalysisAgent(

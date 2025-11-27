@@ -1,10 +1,16 @@
 import "dotenv/config";
+import {
+  IUserInfo,
+  IUserInfoResponse,
+} from "../../interfaces/IUserInfoResponse";
 
 // get nukleio env variables
 const NUKLEIO_API_KEY = process.env.NUKLEIO_API_KEY!;
 const NUKLEIO_BASE_URL = process.env.NUKLEIO_BASE_URL!;
 
-export default async function getUserData(userId: string) {
+export default async function getUserData(
+  userId: string
+): Promise<IUserInfo | null> {
   // fetch the user from nukleio
   const res = await fetch(NUKLEIO_BASE_URL, {
     method: "GET",
@@ -22,7 +28,8 @@ export default async function getUserData(userId: string) {
     );
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as IUserInfoResponse;
+  const userInfo: IUserInfo = data.userInfo;
 
-  return data;
+  return userInfo ?? null;
 }

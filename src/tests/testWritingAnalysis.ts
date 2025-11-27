@@ -1,6 +1,6 @@
 import writingAnalysisAgent from "../agents/writingAnalysisAgent";
 import OpenAI from "openai";
-import getOpenAIClient from "../utils/getOpenAIClient";
+import getOpenAIClient from "../utils/ai/getOpenAIClient";
 
 const sample = `
 (Wake up, F1LTHY)
