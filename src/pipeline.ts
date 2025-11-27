@@ -5,6 +5,7 @@ import getOpenAIClient from "./utils/ai/getOpenAIClient";
 import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
+import firstDraftAgent from "./agents/firstDraftAgent";
 
 // pipeline for agentic workflow
 export async function runPipeline({
@@ -49,15 +50,19 @@ export async function runPipeline({
     : null;
 
   // invoke cover letter first draft agent
+  const firstDraft: string = await firstDraftAgent(
+    clientOpenAI,
+    userData,
+    jobData,
+    writingAnalysis
+  );
 
-  let isDraftGoodEnough = false;
+  let isDraftGoodEnough = true;
   do {
     // invoke draft evaluator agent
     // update isDraftGoodEnough
     // invoke redraft agent
   } while (!isDraftGoodEnough);
 
-  // format the draft as a pdf
-
-  // return the pdf file
+  return firstDraft;
 }
