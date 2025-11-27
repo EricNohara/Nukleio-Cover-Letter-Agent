@@ -1,12 +1,18 @@
 // @ts-ignore
-import rs from "text-readability";
-
-// @ts-ignore
 const stopwords = require("stopwords").english;
 
 import { quantitativeSchema, QuantitativeMetrics } from "./writingSchema";
 
-export function analyzeWritingQualitative(text: string): QuantitativeMetrics {
+// Load text-readability lazily via dynamic import
+async function loadReadability() {
+  return await import("text-readability");
+}
+
+export async function analyzeWritingQualitative(
+  text: string
+): Promise<QuantitativeMetrics> {
+  const rs = await loadReadability();
+
   const wordCount = rs.lexiconCount(text);
   const sentenceCount = rs.sentenceCount(text);
   const totalSyllables = rs.syllableCount(text);

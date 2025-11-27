@@ -20,12 +20,12 @@ function generatePromptWithWritingAnalysis(
     1. Name, date, and contact information
     2. Proper greeting **using hiring manager's name if available**
     3. Strong introductory paragraph
-    4. 1–2 body paragraphs clearly linking the user’s experience and skills to the job requirements and technologies
+    4. 1-2 body paragraphs clearly linking the user's experience and skills to the job requirements and technologies
     5. Professional closing paragraph
-    6. User’s full name as a sign off/signature
+    6. User's full name as a sign off/signature
 
     **Requirements:**
-    - Reflect the user’s actual background, education, experiences, and projects
+    - Reflect the user's actual background, education, experiences, and projects
     - Map user skills and technologies directly to those specified in the job
     - Personalize the letter
     - Avoid generic fillers or buzzwords
@@ -74,12 +74,12 @@ function generatePromptWithoutWritingAnalysis(
     1. Name, date, and contact information
     2. Proper greeting **using hiring manager's name if available**
     3. Strong introductory paragraph
-    4. 1–2 body paragraphs clearly linking the user’s experience and skills to the job requirements and technologies
+    4. 1-2 body paragraphs clearly linking the user's experience and skills to the job requirements and technologies
     5. Professional closing paragraph
-    6. User’s full name as a sign off/signature
+    6. User's full name as a sign off/signature
 
     **Requirements:**
-    - Reflect the user’s actual background, education, experiences, and projects
+    - Reflect the user's actual background, education, experiences, and projects
     - Map user skills and technologies directly to those specified in the job
     - Personalize the letter
     - Avoid generic fillers or buzzwords
