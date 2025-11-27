@@ -8,3 +8,10 @@ export interface IObjectiveEvaluationResult {
     longSentenceCount: number;
   };
 }
+
+export interface ILlmEvaluationResult {
+  score: number; // 0–100
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+}

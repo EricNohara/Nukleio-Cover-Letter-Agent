@@ -6,6 +6,7 @@ import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
+import { Conversation } from "openai/resources/conversations/conversations";
 
 // pipeline for agentic workflow
 export async function runPipeline({
@@ -49,11 +50,43 @@ export async function runPipeline({
     ? await writingAnalysisAgent(clientOpenAI, writingSample)
     : null;
 
+  // create a conversation to reuse past inputted data
+  const conversation: Conversation = await clientOpenAI.conversations.create({
+    metadata: { topic: "cover_letter_pipeline" },
+    items: [
+      {
+        type: "message",
+        role: "system",
+        content: [
+          { type: "input_text", text: "User data:" },
+          { type: "input_text", text: JSON.stringify(userData) },
+        ],
+      },
+      {
+        type: "message",
+        role: "system",
+        content: [
+          { type: "input_text", text: "Job data:" },
+          { type: "input_text", text: JSON.stringify(jobData) },
+        ],
+      },
+      {
+        type: "message",
+        role: "system",
+        content: [
+          { type: "input_text", text: "Writing analysis:" },
+          { type: "input_text", text: JSON.stringify(writingAnalysis) },
+        ],
+      },
+    ],
+  });
+
+  const conversationId = conversation.id;
+
   // invoke cover letter first draft agent
   const firstDraft: string = await firstDraftAgent(
     clientOpenAI,
-    userData,
-    jobData,
+    conversationId,
     writingAnalysis
   );
 

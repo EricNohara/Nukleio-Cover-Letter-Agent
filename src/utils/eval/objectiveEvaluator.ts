@@ -1,22 +1,39 @@
 import { IObjectiveEvaluationResult } from "../../interfaces/IEvaluator";
 import { ITheirStackJob } from "../../interfaces/ITheirStackResponse";
 import { IUserInfo } from "../../interfaces/IUserInfoResponse";
-import { WritingAnalysis } from "../writing/writingSchema";
 
 export async function objectiveEvaluator(
   draft: string,
   userData: IUserInfo,
-  jobData: ITheirStackJob,
-  writingAnalysis: WritingAnalysis
+  jobData: ITheirStackJob
 ): Promise<IObjectiveEvaluationResult> {
   const issues: string[] = [];
 
   // Trim + normalize
   const text = draft.trim();
-  const paragraphs = text
+  const dearIndex = text.toLowerCase().indexOf("dear ");
+  let bodyText = text;
+
+  if (dearIndex !== -1) {
+    bodyText = text.slice(dearIndex);
+  }
+
+  // Split into raw paragraph blocks
+  const rawParagraphs = bodyText
     .split(/\n\s*\n/)
     .map((p) => p.trim())
-    .filter(Boolean);
+    .filter((p) => p.length > 0);
+
+  // Treat as a "paragraph" ONLY if it contains > 1 sentences
+  const paragraphs = rawParagraphs.filter((p) => {
+    const sentenceCount = p
+      .split(/[.!?]+/)
+      .map((s) => s.trim())
+      .filter(Boolean).length;
+
+    return sentenceCount > 1;
+  });
+
   const sentences = text
     .split(/[.!?]+/)
     .map((s) => s.trim())
@@ -41,20 +58,32 @@ export async function objectiveEvaluator(
   if (jobData.hiring_team && jobData.hiring_team.length > 0) {
     const possibleNames = jobData.hiring_team
       .flatMap((m) => {
-        const names: string[] = [];
-        if (m.full_name) {
-          names.push(m.full_name);
-          const parts = m.full_name.split(" ");
-          parts.forEach((p) => names.push(p));
-        }
-        return names;
-      })
-      .filter(Boolean)
-      .map((n) => n.toLowerCase());
+        const full = m.full_name?.trim();
+        if (!full) return [];
 
-    const greetingUsed = greetingMatch?.[1]
-      ? greetingMatch[1].trim().toLowerCase()
-      : null;
+        // Split into words
+        const parts = full.split(/\s+/);
+
+        // Remove punctuation from each part
+        const strippedParts = parts.map(
+          (p) => p.replace(/^[^\w]+|[^\w]+$/g, "") // remove punctuation at start/end
+        );
+
+        // Remove suffixes or certifications
+        const cleanedParts = strippedParts.filter(
+          (p) => !/^(cpsr|phd|md|jr|sr|ii|iii|iv)$/i.test(p)
+        );
+
+        const cleanedFull = cleanedParts.join(" ");
+
+        return [
+          cleanedFull.toLowerCase(),
+          ...cleanedParts.map((p) => p.toLowerCase()),
+        ];
+      })
+      .filter((n) => n.length > 0);
+
+    const greetingUsed = greetingMatch?.[1]?.trim().toLowerCase() || null;
 
     if (greetingUsed) {
       // Must match one of the known names
