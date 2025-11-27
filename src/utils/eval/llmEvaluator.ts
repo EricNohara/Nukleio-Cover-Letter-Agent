@@ -1,13 +1,10 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../../interfaces/IUserInfoResponse";
-import { ITheirStackJob } from "../../interfaces/ITheirStackResponse";
 import { ILlmEvaluationResult } from "../../interfaces/IEvaluator";
 
 export default async function llmEvaluator(
   clientOpenAI: OpenAI,
-  draft: string,
-  userData: IUserInfo,
-  jobData: ITheirStackJob
+  conversationId: string,
+  draft: string
 ): Promise<ILlmEvaluationResult> {
   const prompt = `You are a hiring manager and technical writing reviewer.
 
@@ -17,11 +14,10 @@ Evaluate this cover letter DRAFT for:
 - technical alignment with the role
 - tone consistency and professionalism
 
-User background:
-${JSON.stringify(userData, null, 2)}
-
-Job posting:
-${JSON.stringify(jobData, null, 2)}
+Use the following in your evaluation:
+- the USER DATA previously stored in the conversation
+- the JOB DATA previously stored in the conversation
+- the WRITING ANALYSIS previously stored in the conversation
 
 Draft to evaluate:
 """
@@ -44,13 +40,24 @@ Rules:
 - ONLY RETURN THE JSON IN THE EXACT FORMAT SPECIFIED.
 - Be honest and strict. This feeds back into an improvement pipeline.`;
 
-  const response = await clientOpenAI.chat.completions.create({
-    model: "gpt-5.1",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.2, // Low for consistency but enough variation for improvements
+  await clientOpenAI.conversations.items.create(conversationId, {
+    items: [
+      {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: prompt }],
+      },
+    ],
   });
 
-  const raw = response.choices?.[0]?.message?.content?.trim();
+  const response = await clientOpenAI.responses.create({
+    model: "gpt-5.1",
+    conversation: conversationId,
+    input: "Evaluate the draft now and output the JSON ONLY.",
+    temperature: 0.2,
+  });
+
+  const raw = response.output_text?.trim();
   if (!raw) throw new Error("LLM evaluator returned no output.");
 
   try {

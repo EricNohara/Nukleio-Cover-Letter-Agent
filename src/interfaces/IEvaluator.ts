@@ -15,3 +15,8 @@ export interface ILlmEvaluationResult {
   weaknesses: string[];
   recommendations: string[];
 }
+
+export interface IDraftEvaluationResult {
+  objectiveEvaluation: IObjectiveEvaluationResult;
+  llmEvaluation: ILlmEvaluationResult;
+}

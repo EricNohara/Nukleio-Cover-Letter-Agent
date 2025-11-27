@@ -7,6 +7,8 @@ import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
 import { Conversation } from "openai/resources/conversations/conversations";
+import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
+import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
 
 // pipeline for agentic workflow
 export async function runPipeline({
@@ -93,11 +95,21 @@ export async function runPipeline({
   let isDraftGoodEnough = true;
   let iterationCount = 0;
   const maxIterations = 3;
+  let draftEvaluation: IDraftEvaluationResult;
   do {
     // invoke draft evaluator agent
+    draftEvaluation = await draftEvaluatorAgent(
+      clientOpenAI,
+      conversationId,
+      firstDraft,
+      userData,
+      jobData,
+      writingAnalysis
+    );
+
     // update isDraftGoodEnough
     // invoke redraft agent
   } while (!isDraftGoodEnough && iterationCount < maxIterations);
 
-  return firstDraft;
+  return draftEvaluation;
 }
