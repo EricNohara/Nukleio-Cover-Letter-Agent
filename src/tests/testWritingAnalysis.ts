@@ -1,36 +1,10 @@
 import writingAnalysisAgent from "../agents/writingAnalysisAgent";
 import OpenAI from "openai";
-import getOpenAIClient from "../utils/getOpenAIClient";
+import getOpenAIClient from "../utils/ai/getOpenAIClient";
 
 const sample = `
-(Wake up, F1LTHY)
-Huh
-Huh, huh, huh, huh
-
-[Chorus: Ken Carson]
-And the Kel-Tec'll make a nigga flip like gymnastics
-I fuck Barbie bitches, yeah, yeah, all my hoes plastic
-All my hoes know how to act, all my hoes classy
-All my hoes fuck me like they life on the line
-She fuckin' with the gang, yeah, she know every gang sign
-If I call her, she gon' pull up, yeah, every time
-I got one in the head, yeah, of my .9
-I'm paranoid, I'll take your life, yeah, before you take minе
-Yeah, I'm paranoid
-
-[Verse: Destroy Lonely]
-Yeah, I'm paranoid
-I got white diamonds and thеy colder than Illinois
-I like freak hoes, they ain't fuckin' with y'all boys
-I do free throws, I've been ballin' with no court
-Lil' nigga, be quiet, you ain't makin' no noise
-And my weed way louder than a speaker, lil' boy
-Lil' shawty tryna fuck on me 'cause she know I been the boy
-I been havin' cash, I been gettin' money, yeah, boy
-I'm in a Trackhawk, I do supercharging to it
-My FN souped-up, this is not a toy
-And I need my money first, before you proceed to move forward
-And I got your ho on her knees, 'cause she know she just met the Lord
+Throughout South African folklore, there exists an extensive subgenre of legends and stories featuring supernatural events. Specimens of Bushman Folklore by Wilhelm H. I. Bleek, and Lucy C. Lloyd, features a large collection of such mythological stories, and these stories provide an important and unique view into the culture of the San people. One particularly striking pattern seen throughout many of these folktales is the repeated focus on themes of transformation and power. This headnote will first analyze the role of animals within South African literature before exploring the various supernatural events that occur within three short stories from Bleek and Lloyd’s collection. It will contextualize these events with the goal of interpreting the San people’s cultural ideas on the themes of power, transformation, and submission to greater forces.
+	Before analyzing these supernatural events, it is important to note the importance and prevalence of animals throughout South African folklore. These stories often use animals as their main characters or feature a human transforming into an animal as a main plot point. Jacob Kehinde Olupona explains that “animals feature prominently in cosmogonic myths by conveying the sacred power and messages with which the primordial chaos was transformed into the habitable cosmos” (Olupona 3). In other words, animals act as examples to learn from and are used to convey the power of the natural world. This phenomenon can be seen in all three stories selected. “The Origin of Death” features a human who argues with the Moon, a godlike entity, and is transformed into a hare as a result. “The Girl’s Story; the Frog’s Story” reaches a climactic ending where a human who ate a supernatural water being is punished when her entire family is transformed into frogs. Finally, “The Death of the Lizard” uses a lizard’s dead body to explain the existence of a mountain range by stating that the lizard transformed into the landscape. Importantly, Olupona postulates that both humans and animals possess spirit doubles that have “quasi human and superhuman faculties” (5). So, in South African culture, the spirits of humans and animals can be viewed as equal. This spiritual connection between humans and animals explains why so many San folktales revolve around transformations between the two. It also shows how South Africans use animals as characters as a cultural device to convey important lessons in a story format, as well as how they maintain their spiritual relevance to humans. Keeping this in mind, the themes present within South African folklore become clearer. 
 `;
 
 async function runAnalysis() {

@@ -1,0 +1,21 @@
+{
+  "avgSentenceLength": 24.352941176470587,
+  "avgSyllablesPerWord": 1.7415458937198067,
+  "fleschKincaidGrade": 14,
+  "stopwordRatio": 0.48792270531400966,
+  "punctuationComplexity": 1,
+  "textStandard": 14,
+  "tone": {
+    "formality": "formal",
+    "confidence": "assertive",
+    "sentiment": "neutral"
+  },
+  "sentencePatterns": {
+    "structure": "complex",
+    "variedPacing": "medium"
+  },
+  "cohesion": {
+    "paragraphLength": "medium",
+    "connectors": ["and", "before", "so", "also", "as well as"]
+  }
+}
