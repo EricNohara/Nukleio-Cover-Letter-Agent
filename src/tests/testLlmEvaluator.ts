@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { ITheirStackJob } from "../interfaces/ITheirStackResponse";
-import { IUserInfo } from "../interfaces/IUserInfoResponse";
 import { ILlmEvaluationResult } from "../interfaces/IEvaluator";
 import llmEvaluator from "../utils/eval/llmEvaluator";
 import OpenAI from "openai";
@@ -18,13 +16,10 @@ function loadJSON<T>(file: string): T {
 
 const test = async () => {
   const clientOpenAI: OpenAI = getOpenAIClient();
-  const userData = loadJSON<IUserInfo>("userInfo.json");
-  const jobData = loadJSON<ITheirStackJob>("jobApiResponse.json");
   const output: ILlmEvaluationResult = await llmEvaluator(
     clientOpenAI,
-    draft,
-    userData,
-    jobData
+    "",
+    draft
   );
 
   console.log(output);
