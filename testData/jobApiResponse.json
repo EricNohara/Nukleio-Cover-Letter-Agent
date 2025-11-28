@@ -5,7 +5,6 @@
   "job_title": "Javascript Developer",
   "remote": false,
   "hybrid": false,
-  "salary_string": null,
   "seniority": "mid_level",
   "hiring_team": [
     {
@@ -25,10 +24,7 @@
   "company_object": {
     "name": "Envision",
     "industry": "Hospitals and Health Care",
-    "employee_count": 51,
-    "long_description": "Envision, Inc. is a locally owned and operated supported living organization in Johnson City, TN. We have been established for over 16 years and continue to grow. We are passionate about enhancing the lives of individuals with developmental disabilities. Our program is designed to connect the people we support to their community while offering the highest standard of personal and medical care. State quality assurance surveys consistently rank our services as the best in the area with a highly competitive 4 star rating and perfect survey scores. Caregivers, home managers, nurses and administrators all play a vital role in achieving these goals. Join us today for a meaningful career!",
-    "city": null,
-    "company_keywords": []
+    "long_description": "Envision, Inc. is a locally owned and operated supported living organization in Johnson City, TN. We have been established for over 16 years and continue to grow. We are passionate about enhancing the lives of individuals with developmental disabilities. Our program is designed to connect the people we support to their community while offering the highest standard of personal and medical care. State quality assurance surveys consistently rank our services as the best in the area with a highly competitive 4 star rating and perfect survey scores. Caregivers, home managers, nurses and administrators all play a vital role in achieving these goals. Join us today for a meaningful career!"
   },
   "locations": [
     {

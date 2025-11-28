@@ -7,7 +7,6 @@ export interface IUserInfo {
   phone_number: string | null;
   email: string;
   current_address: string | null;
-  bio: string | null;
   current_position: string | null;
   current_company: string | null;
   skills: IUserSkill[];
@@ -20,8 +19,6 @@ export interface IUserInfo {
 
 export interface IUserSkill {
   name: string;
-  proficiency: number;
-  years_of_experience: number;
 }
 
 /* ---------------- EXPERIENCE ---------------- */
@@ -59,7 +56,5 @@ export interface IUserEducation {
 }
 
 export interface IUserCourse {
-  name: string;
-  grade: string | null;
   description: string | null;
 }

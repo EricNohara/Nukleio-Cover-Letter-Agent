@@ -9,7 +9,6 @@ export interface ITheirStackJob {
   job_title: string;
   remote: boolean | null;
   hybrid: boolean | null;
-  salary_string: string | null;
   seniority: string | null;
   hiring_team: IHiringTeamMember[];
   employment_statuses: string[];
@@ -28,10 +27,7 @@ export interface IHiringTeamMember {
 export interface ITheirStackCompany {
   name: string;
   industry: string | null;
-  employee_count: number | null;
   long_description: string | null;
-  city: string | null;
-  company_keywords: string[];
 }
 
 export interface ITheirStackLocation {

@@ -14,7 +14,6 @@ function cleanJob(raw: any): ITheirStackJob {
     job_title: raw.job_title,
     remote: raw.remote,
     hybrid: raw.hybrid,
-    salary_string: raw.salary_string,
     seniority: raw.seniority,
     hiring_team:
       raw.hiring_team?.map((m: any) => ({
@@ -28,10 +27,7 @@ function cleanJob(raw: any): ITheirStackJob {
     company_object: {
       name: raw.company_object?.name,
       industry: raw.company_object?.industry,
-      employee_count: raw.company_object?.employee_count,
       long_description: raw.company_object?.long_description,
-      city: raw.company_object?.city,
-      company_keywords: raw.company_object?.company_keywords ?? [],
     },
     locations:
       raw.locations?.map((l: any) => ({

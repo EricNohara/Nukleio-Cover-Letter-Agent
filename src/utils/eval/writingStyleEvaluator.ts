@@ -103,7 +103,8 @@ export default async function writingStyleEvaluator(
 
   const draftWritingAnalysis: WritingAnalysis = await writingAnalysisAgent(
     clientOpenAI,
-    draft
+    draft,
+    true
   );
 
   // compare to user's writing analysis

@@ -1,44 +1,42 @@
 import OpenAI from "openai";
 import { ILlmEvaluationResult } from "../../interfaces/IEvaluator";
+import { WritingAnalysis } from "../writing/writingSchema";
 
 export default async function llmEvaluator(
   clientOpenAI: OpenAI,
   conversationId: string,
-  draft: string
+  writingAnalysis: WritingAnalysis | null
 ): Promise<ILlmEvaluationResult> {
-  const prompt = `You are a hiring manager and technical writing reviewer.
+  const prompt = `You are a hiring manager reviewing a cover letter.
 
-Evaluate this cover letter DRAFT for:
-- clarity, impact, readability
+Evaluate the MOST RECENT draft in this conversation. 
+It will be stored as a message beginning with **"LATEST_DRAFT:"**.
+
+Use ONLY:
+- USER_DATA 
+- JOB_DATA 
+${writingAnalysis && "- WRITING_ANALYSIS"}
+- LATEST_DRAFT (the NEWEST one only)
+
+Your evaluation must address:
+- clarity, impact, readability, professionalism
 - relevance to the job description
 - technical alignment with the role
-- tone consistency and professionalism
-
-Use the following in your evaluation:
-- the USER DATA previously stored in the conversation
-- the JOB DATA previously stored in the conversation
-- the WRITING ANALYSIS previously stored in the conversation
-
-Draft to evaluate:
-"""
-${draft}
-"""
 
 Return ONLY valid JSON in this EXACT shape:
 
 {
   "score": number,            // 0 to 100 (how strong the letter is)
   "strengths": string[],      // 3 things the draft does well
-  "weaknesses": string[],     // 3 things that must be improved
+  "weaknesses": string[],     // 3 things to be improved
   "recommendations": string[] // 3 specific rewrite instructions
 }
 
 Rules:
 - Do NOT rewrite the draft.
-- Do NOT return anything other than the JSON.
-- Do NOT exceed the limit of 3 items for strengths, weaknesses, and recommendations.
-- ONLY RETURN THE JSON IN THE EXACT FORMAT SPECIFIED.
-- Be honest and strict. This feeds back into an improvement pipeline.`;
+- Do NOT output anything other than the JSON.
+- EXACTLY 3 strengths, 3 weaknesses, 3 recommendations.
+- Be strict and objective.`;
 
   await clientOpenAI.conversations.items.create(conversationId, {
     items: [

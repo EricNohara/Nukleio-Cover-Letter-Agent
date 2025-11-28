@@ -1,13 +1,13 @@
 import OpenAI from "openai";
 import { WritingAnalysis } from "../utils/writing/writingSchema";
 
-function generatePromptWithWritingAnalysis() {
+function generatePrompt(writingAnalysis: WritingAnalysis | null) {
   return `You are a cover letter writer.
 
-Write a polished 250 - 400 word cover letter using:
-- the USER DATA previously stored in the conversation
-- the JOB DATA previously stored in the conversation
-- the WRITING ANALYSIS previously stored in the conversation
+Write a 250 - 400 word cover letter using:
+- USER_DATA
+- JOB_DATA
+${writingAnalysis && "- WRITING_ANALYSIS"}
 
 Follow this strict structure:
 1. Applicant name + contact info + date
@@ -21,35 +21,8 @@ Requirements:
 - Use the user's real experiences only
 - Map technical skills directly to job requirements
 - Slight imperfections allowed
-- Vary sentence length
+- Vary sentence length. Keep sentences shorter than 25 words.
 - Avoid cliches / buzzwords
-- No course names (describe concepts instead)
-- Output ONLY the plain text letter, NOTHING else.
-  `.trim();
-}
-
-function generatePromptWithoutWritingAnalysis() {
-  return `You are a cover letter writer.
-
-Write a polished 250 - 400 word cover letter using:
-- the USER DATA previously stored in the conversation
-- the JOB DATA previously stored in the conversation
-
-Follow this strict structure:
-1. Applicant name + contact info + date
-2. Personalized greeting with hiring manager name if known
-3. Strong intro paragraph
-4. 1 - 2 technical body paragraphs linking user's skills to job requirements
-5. Professional closing paragraph
-6. "Sincerely," + 2 - 4 blank lines + applicant's full name
-
-Requirements:
-- Use the user's real experiences only
-- Map technical skills directly to job requirements
-- Slight imperfections allowed
-- Vary sentence length
-- Avoid cliches / buzzwords
-- No course names (describe concepts instead)
 - Output ONLY the plain text letter, NOTHING else.
   `.trim();
 }
@@ -59,9 +32,7 @@ export default async function firstDraftAgent(
   conversationId: string,
   writingAnalysis: WritingAnalysis | null
 ) {
-  const prompt = writingAnalysis
-    ? generatePromptWithWritingAnalysis()
-    : generatePromptWithoutWritingAnalysis();
+  const prompt = generatePrompt(writingAnalysis);
 
   // generate the draft
   await clientOpenAI.conversations.items.create(conversationId, {

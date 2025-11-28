@@ -44,7 +44,6 @@ export default async function getUserData(
     phone_number: u.phone_number ?? null,
     email: u.email,
     current_address: u.current_address ?? null,
-    bio: u.bio ?? null,
     current_position: u.current_position ?? null,
     current_company: u.current_company ?? null,
 
@@ -52,8 +51,6 @@ export default async function getUserData(
     skills: (u.skills ?? []).map(
       (s): IUserSkill => ({
         name: s.name,
-        proficiency: s.proficiency,
-        years_of_experience: s.years_of_experience,
       })
     ),
 
@@ -92,8 +89,6 @@ export default async function getUserData(
         year_end: ed.year_end ?? null,
         courses: (ed.courses ?? []).map(
           (c): IUserCourse => ({
-            name: c.name,
-            grade: c.grade ?? null,
             description: c.description ?? null,
           })
         ),

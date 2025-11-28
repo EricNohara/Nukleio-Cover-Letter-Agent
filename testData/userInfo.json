@@ -3,179 +3,110 @@
   "phone_number": "6363179533",
   "email": "ernohara@bu.edu",
   "current_address": "75 Sandy Ridge Court",
-  "bio": "I'm a rising senior at Boston University pursuing a master's degree in Computer Science. I'm interested in computer systems, web and game development, and machine learning!",
   "current_position": "Software developer and graduate student",
   "current_company": "",
   "skills": [
     {
-      "name": "Java",
-      "proficiency": 9,
-      "years_of_experience": 5
+      "name": "Java"
     },
     {
-      "name": "Next.js",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "Next.js"
     },
     {
-      "name": "Python",
-      "proficiency": 8,
-      "years_of_experience": 5
+      "name": "Python"
     },
     {
-      "name": "React.js",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "React.js"
     },
     {
-      "name": "JavaScript",
-      "proficiency": 8,
-      "years_of_experience": 4
+      "name": "JavaScript"
     },
     {
-      "name": "HTML + CSS",
-      "proficiency": 9,
-      "years_of_experience": 4
+      "name": "HTML + CSS"
     },
     {
-      "name": "Git",
-      "proficiency": 8,
-      "years_of_experience": 5
+      "name": "Git"
     },
     {
-      "name": "Linux",
-      "proficiency": 8,
-      "years_of_experience": 3
+      "name": "Linux"
     },
     {
-      "name": "Windows",
-      "proficiency": 10,
-      "years_of_experience": 8
+      "name": "Windows"
     },
     {
-      "name": "TypeScript",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "TypeScript"
     },
     {
-      "name": "SQL",
-      "proficiency": 9,
-      "years_of_experience": 3
+      "name": "SQL"
     },
     {
-      "name": "OCaml",
-      "proficiency": 5,
-      "years_of_experience": 1
+      "name": "OCaml"
     },
     {
-      "name": "MS SQL Server",
-      "proficiency": 8,
-      "years_of_experience": 1
+      "name": "MS SQL Server"
     },
     {
-      "name": "PostgreSQL",
-      "proficiency": 8,
-      "years_of_experience": 1
+      "name": "PostgreSQL"
     },
     {
-      "name": "SQLite",
-      "proficiency": 9,
-      "years_of_experience": 2
+      "name": "SQLite"
     },
     {
-      "name": "Tailwind",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": "Tailwind"
     },
     {
-      "name": "Express.js",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "Express.js"
     },
     {
-      "name": "Node.js",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "Node.js"
     },
     {
-      "name": "HTML Templating",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "HTML Templating"
     },
     {
-      "name": "MongoDB",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "MongoDB"
     },
     {
-      "name": "AWS",
-      "proficiency": 7,
-      "years_of_experience": 2
+      "name": "AWS"
     },
     {
-      "name": "XML",
-      "proficiency": 8,
-      "years_of_experience": 2
+      "name": "XML"
     },
     {
-      "name": "C#",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": "C#"
     },
     {
-      "name": ".NET",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": ".NET"
     },
     {
-      "name": "Unit Testing",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": "Unit Testing"
     },
     {
-      "name": "Integration Testing",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": "Integration Testing"
     },
     {
-      "name": "C",
-      "proficiency": 8,
-      "years_of_experience": 4
+      "name": "C"
     },
     {
-      "name": "YAML",
-      "proficiency": 8,
-      "years_of_experience": 1
+      "name": "YAML"
     },
     {
-      "name": "Grafana",
-      "proficiency": 8,
-      "years_of_experience": 1
+      "name": "Grafana"
     },
     {
-      "name": "K6 Load + Performance Testing",
-      "proficiency": 8,
-      "years_of_experience": 1
+      "name": "K6 Load + Performance Testing"
     },
     {
-      "name": "Confluence",
-      "proficiency": 9,
-      "years_of_experience": 1
+      "name": "Confluence"
     },
     {
-      "name": "Jira",
-      "proficiency": 9,
-      "years_of_experience": 1
+      "name": "Jira"
     },
     {
-      "name": "GitHub",
-      "proficiency": 9,
-      "years_of_experience": 5
+      "name": "GitHub"
     },
     {
-      "name": "Azure",
-      "proficiency": 7,
-      "years_of_experience": 1
+      "name": "Azure"
     }
   ],
   "experiences": [
@@ -282,83 +213,51 @@
       "year_end": 2026,
       "courses": [
         {
-          "name": "CS 112",
-          "grade": "A-",
           "description": "Data structures and algorithms"
         },
         {
-          "name": "CS 131",
-          "grade": "A-",
           "description": "Discrete math and combinatoric structures"
         },
         {
-          "name": "CS 132",
-          "grade": "A",
           "description": "Linear algebra"
         },
         {
-          "name": "CS 210",
-          "grade": "A",
           "description": "Computer systems with assembly and C programming"
         },
         {
-          "name": "CS 237",
-          "grade": "A",
           "description": "Probability in computing"
         },
         {
-          "name": "CS 320",
-          "grade": "A-",
           "description": "Compilers and fundamentals of programming languages"
         },
         {
-          "name": "CS 330",
-          "grade": "A",
           "description": "Algorithm design and correctness"
         },
         {
-          "name": "CS 350",
-          "grade": "A",
           "description": "Distributed systems"
         },
         {
-          "name": "CS 391",
-          "grade": "A",
           "description": "React.js and Next.js"
         },
         {
-          "name": "CS 392",
-          "grade": "A",
           "description": "Algorithms in competitive programming"
         },
         {
-          "name": "CS 410",
-          "grade": "A",
           "description": "Systems programming and OS"
         },
         {
-          "name": "CS 440",
-          "grade": "A",
           "description": "Introduction to AI theory and application"
         },
         {
-          "name": "CS 460",
-          "grade": "A",
           "description": "Databases: UML diagrams, SQL, XQuery, MongoDB, distributed databases, DBMS fundamentals"
         },
         {
-          "name": "CS 506",
-          "grade": "A",
           "description": "Data science theory and application"
         },
         {
-          "name": "CS 611",
-          "grade": "A",
           "description": "Application development with OOP"
         },
         {
-          "name": "CS 654",
-          "grade": "A",
           "description": "Embedded systems programming for microcontrollers"
         }
       ]

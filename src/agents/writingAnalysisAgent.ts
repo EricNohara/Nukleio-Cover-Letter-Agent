@@ -12,40 +12,42 @@ import OpenAI from "openai";
 
 export default async function writingAnalysisAgent(
   clientOpenAI: OpenAI,
-  sample: string
+  sample: string,
+  isDraft: boolean = false
 ): Promise<WritingAnalysis> {
   if (!sample.trim()) {
     throw new Error("Writing sample is empty");
   }
 
+  const writingTarget = isDraft
+    ? "the LATEST_DRAFT stored in the conversation"
+    : "the provided writing sample below";
+
   const prompt = `
-    Analyze the following writing sample and return ONLY valid JSON matching this schema EXACTLY.
-    Do NOT include explanations, extra commentary, or numeric readability metrics.
+  Analyze ${writingTarget} and return ONLY valid JSON matching EXACTLY this schema:
 
-    Schema:
-    {
-      "tone": {
-        "formality": "formal | casual | professional | conversational",
-        "confidence": "tentative | assertive | persuasive",
-        "sentiment": "positive | neutral | negative"
-      },
-      "sentencePatterns": {
-        "structure": "simple | compound | complex | mixed",
-        "variedPacing": "low | medium | high"
-      },
-      "cohesion": {
-        "paragraphLength": "short | medium | long",
-        "connectors": []         // e.g., 'however', 'therefore', 'meanwhile'
-      }
+  {
+    "tone": {
+      "formality": "formal | casual | professional | conversational",
+      "confidence": "tentative | assertive | persuasive",
+      "sentiment": "positive | neutral | negative"
+    },
+    "sentencePatterns": {
+      "structure": "simple | compound | complex | mixed",
+      "variedPacing": "low | medium | high"
+    },
+    "cohesion": {
+      "paragraphLength": "short | medium | long",
+      "connectors": []
     }
+  }
 
-    Writing Sample:
-    """
-    ${sample}
-    """
+  Rules:
+  - Output ONLY the JSON.
+  - No commentary, no explanation.
 
-    Output ONLY JSON and nothing else. If there is extra text, the response will be rejected.
-  `;
+  ${!isDraft ? `Writing Sample:\n"""${sample}"""` : ""}
+  `.trim();
 
   // quantitative analysis
   const quantMetrics: QuantitativeMetrics = await analyzeWritingQualitative(

@@ -26,7 +26,7 @@ export default async function draftEvaluatorAgent(
   const llmEvaluation: ILlmEvaluationResult = await llmEvaluator(
     clientOpenAI,
     conversationId,
-    draft
+    writingAnalysis
   );
 
   const writingStyleEvaluation: IWritingStyleEvaluationResult | null =

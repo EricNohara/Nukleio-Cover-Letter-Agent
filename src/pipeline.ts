@@ -9,7 +9,7 @@ import firstDraftAgent from "./agents/firstDraftAgent";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
 import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
 import revisionAgent from "./agents/revisionAgent";
-import createConversation from "./utils/ai/conversation";
+import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 
 // pipeline for agentic workflow
 export async function runPipeline({
@@ -68,6 +68,9 @@ export async function runPipeline({
     writingAnalysis
   );
 
+  // store the draft in the conversation
+  await storeLatestDraft(clientOpenAI, conversationId, currentDraft);
+
   // evaluation feedback loop
   let iterationCount = 0;
   const maxIterations = 3;
@@ -109,9 +112,12 @@ export async function runPipeline({
     currentDraft = await revisionAgent(
       clientOpenAI,
       conversationId,
-      currentDraft,
-      lastEvaluation
+      lastEvaluation,
+      writingAnalysis
     );
+
+    // store latest draft in the conversation
+    await storeLatestDraft(clientOpenAI, conversationId, currentDraft);
   }
 
   return currentDraft;

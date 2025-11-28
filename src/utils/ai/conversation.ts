@@ -7,7 +7,7 @@ import {
   ConversationCreateParams,
 } from "openai/resources/conversations/conversations";
 
-export default async function createConversation(
+export async function createConversation(
   clientOpenAI: OpenAI,
   userData: IUserInfo,
   jobData: ITheirStackJob,
@@ -18,7 +18,7 @@ export default async function createConversation(
       type: "message",
       role: "system",
       content: [
-        { type: "input_text", text: "User data:" },
+        { type: "input_text", text: "USER_DATA:" },
         { type: "input_text", text: JSON.stringify(userData) },
       ],
     },
@@ -26,7 +26,7 @@ export default async function createConversation(
       type: "message",
       role: "system",
       content: [
-        { type: "input_text", text: "Job data:" },
+        { type: "input_text", text: "JOB_DATA:" },
         { type: "input_text", text: JSON.stringify(jobData) },
       ],
     },
@@ -38,7 +38,7 @@ export default async function createConversation(
       type: "message",
       role: "system",
       content: [
-        { type: "input_text", text: "Writing analysis:" },
+        { type: "input_text", text: "WRITING_ANALYSIS:" },
         { type: "input_text", text: JSON.stringify(writingAnalysis) },
       ],
     });
@@ -50,4 +50,24 @@ export default async function createConversation(
   });
 
   return conversation.id;
+}
+
+export async function storeLatestDraft(
+  clientOpenAI: OpenAI,
+  conversationId: string,
+  draft: string
+) {
+  // Store marked draft — model will use only this message
+  await clientOpenAI.conversations.items.create(conversationId, {
+    items: [
+      {
+        type: "message",
+        role: "user",
+        content: [
+          { type: "input_text", text: "LATEST_DRAFT:" },
+          { type: "input_text", text: draft },
+        ],
+      },
+    ],
+  });
 }

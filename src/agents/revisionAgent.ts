@@ -1,17 +1,22 @@
 import OpenAI from "openai";
 import { IDraftEvaluationResult } from "../interfaces/IEvaluator";
+import { WritingAnalysis } from "../utils/writing/writingSchema";
 
-function buildPrompt(draft: string, feedback: IDraftEvaluationResult) {
+function buildPrompt(
+  feedback: IDraftEvaluationResult,
+  writingAnalysis: WritingAnalysis | null
+) {
   return `You are an expert cover letter revisor.
-    You have recieved feedback for your first draft and need to make some changes.
+    You have recieved feedback for your LATEST_DRAFT and need to revise.
     
-    Use ONLY the conversation's stored data:
-    - USER DATA
-    - JOB DATA
-    - WRITING ANALYSIS
+    Use ONLY:
+    - USER_DATA 
+    - JOB_DATA 
+    ${writingAnalysis && "- WRITING_ANALYSIS"}
+    - LATEST_DRAFT (the NEWEST one only)
 
     Your task:
-    Revise the DRAFT to fix all issues described in FEEDBACK while preserving the positive feedback given and the user's information.
+    Revise the LATEST_DRAFT to fix all issues described in FEEDBACK while preserving the positive feedback and the user's information.
 
     Follow this strict structure:
     1. Applicant name + contact info + date
@@ -25,15 +30,9 @@ function buildPrompt(draft: string, feedback: IDraftEvaluationResult) {
     - Use the user's real experiences only
     - Map technical skills directly to job requirements
     - Slight imperfections allowed
-    - Vary sentence length
+    - Vary sentence length. Keep sentences shorter than 25 words.
     - Avoid cliches / buzzwords
-    - No course names (describe concepts instead)
     - Output ONLY the plain text letter, NOTHING else.
-
-    DRAFT:
-    <<<
-    ${draft}
-    >>>
 
     FEEDBACK JSON:
     ${JSON.stringify(feedback)}
@@ -44,10 +43,10 @@ function buildPrompt(draft: string, feedback: IDraftEvaluationResult) {
 export default async function revisionAgent(
   clientOpenAI: OpenAI,
   conversationId: string,
-  draft: string,
-  feedback: IDraftEvaluationResult
+  feedback: IDraftEvaluationResult,
+  writingAnalysis: WritingAnalysis | null
 ) {
-  const prompt = buildPrompt(draft, feedback);
+  const prompt = buildPrompt(feedback, writingAnalysis);
 
   // generate the draft
   await clientOpenAI.conversations.items.create(conversationId, {
