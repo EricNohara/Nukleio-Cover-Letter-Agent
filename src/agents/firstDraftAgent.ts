@@ -7,7 +7,7 @@ function generatePrompt(writingAnalysis: WritingAnalysis | null) {
 Write a 250 - 400 word cover letter using:
 - USER_DATA
 - JOB_DATA
-${writingAnalysis && "- WRITING_ANALYSIS"}
+${writingAnalysis ? "- WRITING_ANALYSIS" : ""}
 
 Follow this strict structure:
 1. Applicant name + contact info + date

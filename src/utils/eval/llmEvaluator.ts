@@ -15,7 +15,7 @@ It will be stored as a message beginning with **"LATEST_DRAFT:"**.
 Use ONLY:
 - USER_DATA 
 - JOB_DATA 
-${writingAnalysis && "- WRITING_ANALYSIS"}
+${writingAnalysis ? "- WRITING_ANALYSIS" : ""}
 - LATEST_DRAFT (the NEWEST one only)
 
 Your evaluation must address:
