@@ -5,7 +5,6 @@ import {
   QualitativeMetrics,
   qualitativeSchema,
 } from "../utils/writing/writingSchema";
-import { analyzeWritingQualitative } from "../utils/writing/textMetrics.mjs";
 import "dotenv/config";
 import cleanLLMOutput from "../utils/ai/cleanLLMResponse";
 import OpenAI from "openai";
@@ -18,6 +17,10 @@ export default async function writingAnalysisAgent(
   if (!sample.trim()) {
     throw new Error("Writing sample is empty");
   }
+
+  const { analyzeWritingQualitative } = await import(
+    "../utils/writing/textMetrics.mjs"
+  );
 
   const writingTarget = isDraft
     ? "the LATEST_DRAFT stored in the conversation"
