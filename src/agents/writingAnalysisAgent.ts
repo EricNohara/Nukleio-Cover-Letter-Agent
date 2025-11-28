@@ -5,7 +5,7 @@ import {
   QualitativeMetrics,
   qualitativeSchema,
 } from "../utils/writing/writingSchema";
-import { analyzeWritingQualitative } from "../utils/writing/textMetrics";
+import { analyzeWritingQualitative } from "../utils/writing/textMetrics.mjs";
 import "dotenv/config";
 import cleanLLMOutput from "../utils/ai/cleanLLMResponse";
 import OpenAI from "openai";
@@ -50,9 +50,7 @@ export default async function writingAnalysisAgent(
   `.trim();
 
   // quantitative analysis
-  const quantMetrics: QuantitativeMetrics = await analyzeWritingQualitative(
-    sample
-  );
+  const quantMetrics: QuantitativeMetrics = analyzeWritingQualitative(sample);
 
   // qualitative analysis
   const response = await clientOpenAI.chat.completions.create({

@@ -1,18 +1,7 @@
 import { quantitativeSchema, QuantitativeMetrics } from "./writingSchema";
+import * as rs from "text-readability";
 
-// Load text-readability lazily via dynamic import
-async function loadReadability() {
-  // All exported functions are inside the default export
-  const mod = await import("text-readability");
-  return mod.default || mod; // defensive fallback
-}
-
-export async function analyzeWritingQualitative(
-  text: string
-): Promise<QuantitativeMetrics> {
-  const rs = await loadReadability();
-
-  // NOW these functions exist
+export function analyzeWritingQualitative(text: string): QuantitativeMetrics {
   const wordCount = rs.lexiconCount(text);
   const sentenceCount = rs.sentenceCount(text);
   const totalSyllables = rs.syllableCount(text);
