@@ -57,11 +57,6 @@ export function compareWritingStyles(
       draftStyle.fleschKincaidGrade
     ),
     compareMetric(
-      "stopwordRatio",
-      userStyle.stopwordRatio,
-      draftStyle.stopwordRatio
-    ),
-    compareMetric(
       "punctuationComplexity",
       userStyle.punctuationComplexity,
       draftStyle.punctuationComplexity
