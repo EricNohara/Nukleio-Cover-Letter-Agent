@@ -5,7 +5,6 @@ export const quantitativeSchema = z.object({
   avgSentenceLength: z.number(),
   avgSyllablesPerWord: z.number(),
   fleschKincaidGrade: z.number(),
-  stopwordRatio: z.number(),
   punctuationComplexity: z.number(),
   textStandard: z.number(),
 });
