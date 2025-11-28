@@ -32,7 +32,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // invoke the agentic pipeline
     const result = await runPipeline(input);
 
-    // return the outputted PDF from pipeline
+    // return the outputted plain text conver letter from pipeline
     return {
       statusCode: 200,
       body: JSON.stringify(result),
