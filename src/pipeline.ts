@@ -6,9 +6,10 @@ import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
-import { Conversation } from "openai/resources/conversations/conversations";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
 import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
+import revisionAgent from "./agents/revisionAgent";
+import createConversation from "./utils/ai/conversation";
 
 // pipeline for agentic workflow
 export async function runPipeline({
@@ -53,63 +54,65 @@ export async function runPipeline({
     : null;
 
   // create a conversation to reuse past inputted data
-  const conversation: Conversation = await clientOpenAI.conversations.create({
-    metadata: { topic: "cover_letter_pipeline" },
-    items: [
-      {
-        type: "message",
-        role: "system",
-        content: [
-          { type: "input_text", text: "User data:" },
-          { type: "input_text", text: JSON.stringify(userData) },
-        ],
-      },
-      {
-        type: "message",
-        role: "system",
-        content: [
-          { type: "input_text", text: "Job data:" },
-          { type: "input_text", text: JSON.stringify(jobData) },
-        ],
-      },
-      {
-        type: "message",
-        role: "system",
-        content: [
-          { type: "input_text", text: "Writing analysis:" },
-          { type: "input_text", text: JSON.stringify(writingAnalysis) },
-        ],
-      },
-    ],
-  });
-
-  const conversationId = conversation.id;
+  const conversationId = await createConversation(
+    clientOpenAI,
+    userData,
+    jobData,
+    writingAnalysis
+  );
 
   // invoke cover letter first draft agent
-  const firstDraft: string = await firstDraftAgent(
+  let currentDraft: string = await firstDraftAgent(
     clientOpenAI,
     conversationId,
     writingAnalysis
   );
 
-  let isDraftGoodEnough = true;
+  // evaluation feedback loop
   let iterationCount = 0;
   const maxIterations = 3;
-  let draftEvaluation: IDraftEvaluationResult;
-  do {
+  let lastEvaluation: IDraftEvaluationResult;
+
+  while (true) {
     // invoke draft evaluator agent
-    draftEvaluation = await draftEvaluatorAgent(
+    lastEvaluation = await draftEvaluatorAgent(
       clientOpenAI,
       conversationId,
-      firstDraft,
+      currentDraft,
       userData,
       jobData,
       writingAnalysis
     );
 
-    // update isDraftGoodEnough
-    // invoke redraft agent
-  } while (!isDraftGoodEnough && iterationCount < maxIterations);
+    // Determine pass/fail
+    const objectivePass =
+      lastEvaluation.objectiveEvaluation.pass &&
+      lastEvaluation.objectiveEvaluation.issues.length === 0;
 
-  return draftEvaluation;
+    const llmPass = lastEvaluation.llmEvaluation.score >= 90;
+
+    const stylePass = lastEvaluation.writingStyleEvaluation
+      ? lastEvaluation.writingStyleEvaluation.deviations.every(
+          (d) => d.severity !== "high"
+        )
+      : true;
+
+    const isPassed = objectivePass && llmPass && stylePass;
+
+    if (isPassed) break; // success
+
+    if (iterationCount >= maxIterations) break; // stop looping
+
+    iterationCount++;
+
+    // Produce revised draft
+    currentDraft = await revisionAgent(
+      clientOpenAI,
+      conversationId,
+      currentDraft,
+      lastEvaluation
+    );
+  }
+
+  return currentDraft;
 }

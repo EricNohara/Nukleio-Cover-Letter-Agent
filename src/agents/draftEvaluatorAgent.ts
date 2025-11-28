@@ -6,9 +6,11 @@ import {
   IDraftEvaluationResult,
   ILlmEvaluationResult,
   IObjectiveEvaluationResult,
+  IWritingStyleEvaluationResult,
 } from "../interfaces/IEvaluator";
 import { ITheirStackJob } from "../interfaces/ITheirStackResponse";
 import llmEvaluator from "../utils/eval/llmEvaluator";
+import writingStyleEvaluator from "../utils/eval/writingStyleEvaluator";
 
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
@@ -27,9 +29,13 @@ export default async function draftEvaluatorAgent(
     draft
   );
 
+  const writingStyleEvaluation: IWritingStyleEvaluationResult | null =
+    await writingStyleEvaluator(clientOpenAI, draft, writingAnalysis);
+
   const result: IDraftEvaluationResult = {
     objectiveEvaluation: objectiveEvaluation,
     llmEvaluation: llmEvaluation,
+    writingStyleEvaluation: writingStyleEvaluation,
   };
 
   return result;
