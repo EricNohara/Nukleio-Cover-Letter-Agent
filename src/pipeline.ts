@@ -89,7 +89,7 @@ export async function runPipeline({
       lastEvaluation.objectiveEvaluation.pass &&
       lastEvaluation.objectiveEvaluation.issues.length === 0;
 
-    const llmPass = lastEvaluation.llmEvaluation.score >= 85;
+    const llmPass = lastEvaluation.llmEvaluation.score >= 90;
 
     const stylePass = lastEvaluation.writingStyleEvaluation
       ? lastEvaluation.writingStyleEvaluation.deviations.every(
