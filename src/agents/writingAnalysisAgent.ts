@@ -8,6 +8,7 @@ import {
 import "dotenv/config";
 import cleanLLMOutput from "../utils/ai/cleanLLMResponse";
 import OpenAI from "openai";
+import { analyzeWritingQualitative } from "../utils/writing/textMetrics";
 
 export default async function writingAnalysisAgent(
   clientOpenAI: OpenAI,
@@ -17,10 +18,6 @@ export default async function writingAnalysisAgent(
   if (!sample.trim()) {
     throw new Error("Writing sample is empty");
   }
-
-  const { analyzeWritingQualitative } = await import(
-    "../utils/writing/textMetrics.js"
-  );
 
   const writingTarget = isDraft
     ? "the LATEST_DRAFT stored in the conversation"
@@ -53,7 +50,9 @@ export default async function writingAnalysisAgent(
   `.trim();
 
   // quantitative analysis
-  const quantMetrics: QuantitativeMetrics = analyzeWritingQualitative(sample);
+  const quantMetrics: QuantitativeMetrics = await analyzeWritingQualitative(
+    sample
+  );
 
   // qualitative analysis
   const response = await clientOpenAI.chat.completions.create({
