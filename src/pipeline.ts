@@ -128,22 +128,29 @@ export async function runPipeline({
 export async function runRevisionPipeline({
   conversationId,
   feedback,
+  finalLetter,
 }: {
   conversationId: string;
   feedback: string;
+  finalLetter?: string | undefined;
 }) {
   const clientOpenAI = getOpenAIClient();
 
-  // generate the final draft
-  const finalDraft = await userRevisionAgent(
-    clientOpenAI,
-    conversationId,
-    feedback
-  );
+  if (!finalLetter) {
+    // generate the final draft
+    const finalDraft = await userRevisionAgent(
+      clientOpenAI,
+      conversationId,
+      feedback
+    );
 
-  // convert the text into pdf
-  const pdfBuffer = await generateCoverLetterPdf(finalDraft);
+    // convert the text into pdf
+    const pdfBuffer = await generateCoverLetterPdf(finalDraft);
 
-  // return the pdf
-  return pdfBuffer;
+    // return the pdf
+    return pdfBuffer;
+  } else {
+    const pdfBuffer = await generateCoverLetterPdf(finalLetter);
+    return pdfBuffer;
+  }
 }

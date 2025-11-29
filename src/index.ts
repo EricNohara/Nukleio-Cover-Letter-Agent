@@ -14,6 +14,7 @@ const generateSchema = z.object({
 const reviseSchema = z.object({
   conversationId: z.string(),
   feedback: z.string(),
+  finalLetter: z.string().optional(),
 });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {

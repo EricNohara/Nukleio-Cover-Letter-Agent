@@ -24,6 +24,8 @@ Requirements:
 - Vary sentence length. Keep sentences shorter than 25 words.
 - Avoid cliches / buzzwords
 - Output ONLY the plain text letter, NOTHING else.
+- Must be 250 - 400 words NO MATTER WHAT.
+- Must be 3 - 5 paragraphs NO MATTER WHAT.
   `.trim();
 }
 
