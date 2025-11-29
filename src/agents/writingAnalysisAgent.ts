@@ -19,7 +19,7 @@ export default async function writingAnalysisAgent(
   }
 
   const { analyzeWritingQualitative } = await import(
-    "../utils/writing/textMetrics.mjs"
+    "../utils/writing/textMetrics.js"
   );
 
   const writingTarget = isDraft
