@@ -17,6 +17,18 @@ const reviseSchema = z.object({
 });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  // Handle preflight CORS
+  if (event.requestContext.http.method === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+      },
+    };
+  }
+
   try {
     const route = event.rawPath;
 
@@ -27,6 +39,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       const result = await runPipeline(input);
       return {
         statusCode: 200,
+        headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify(result),
       };
     }
@@ -38,6 +51,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       return {
         statusCode: 200,
         headers: {
+          "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/pdf",
           "Content-Disposition": 'inline; filename="cover_letter.pdf"',
         },
@@ -48,11 +62,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     return {
       statusCode: 404,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ success: false, error: "Route not found" }),
     };
   } catch (err: any) {
     return {
       statusCode: 400,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ success: false, error: err.message }),
     };
   }
