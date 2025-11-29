@@ -1,21 +1,21 @@
-declare module "readability-score" {
-  export default class Readability {
-    constructor(text: string);
+declare module "text-readability" {
+  interface TextReadability {
+    syllableCount(text: string, lang?: string): number;
+    lexiconCount(text: string, removePunctuation?: boolean): number;
+    sentenceCount(text: string): number;
 
-    lexiconCount(ignoreNumbers?: boolean): number;
-    syllableCount(text?: string): number;
-    sentenceCount(): number;
+    fleschReadingEase(text: string): number;
+    fleschKincaidGrade(text: string): number;
+    gunningFog(text: string): number;
+    smogIndex(text: string): number;
+    automatedReadabilityIndex(text: string): number;
+    colemanLiauIndex(text: string): number;
+    linsearWriteFormula(text: string): number;
+    daleChallReadabilityScore(text: string): number;
 
-    fleschReadingEase(): number;
-    fleschKincaidGradeLevel(): number;
-    automatedReadabilityIndex(): number;
-    colemanLiauIndex(): number;
-    smogIndex(): number;
-    gunningFogScore(): number;
-
-    textStandard(
-      formatOutput?: boolean | undefined,
-      useFraction?: boolean | undefined
-    ): number | string;
+    textStandard(text: string, float_output?: boolean): number;
   }
+
+  const rs: TextReadability;
+  export = rs;
 }
