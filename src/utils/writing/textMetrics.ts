@@ -1,26 +1,19 @@
 import { quantitativeSchema, QuantitativeMetrics } from "./writingSchema";
+import Readability from "readability-score";
 
-export async function analyzeWritingQualitative(
-  text: string
-): Promise<QuantitativeMetrics> {
-  const {
-    syllableCount,
-    sentenceCount,
-    lexiconCount,
-    fleschKincaidGrade,
-    textStandard,
-  } = await import("text-readability");
+export function analyzeWritingQualitative(text: string): QuantitativeMetrics {
+  const r = new Readability(text);
 
-  const wordCount = lexiconCount(text);
-  const textSentenceCount = sentenceCount(text);
-  const totalSyllables = syllableCount(text);
-  const avgSentenceLength = wordCount / Math.max(textSentenceCount, 1);
+  const wordCount = r.lexiconCount();
+  const sentenceCount = r.sentenceCount();
+  const totalSyllables = r.syllableCount();
+
+  const avgSentenceLength = wordCount / Math.max(sentenceCount, 1);
   const avgSyllablesPerWord = totalSyllables / Math.max(wordCount, 1);
-  const grade = fleschKincaidGrade(text);
-  const standard = textStandard(text, true);
-
+  const grade = r.fleschKincaidGradeLevel();
+  const standard = r.textStandard();
   const punctuationComplexity =
-    (text.match(/[;,:\-—]/g)?.length || 0) / Math.max(textSentenceCount, 1);
+    (text.match(/[;,:\-—]/g)?.length || 0) / Math.max(sentenceCount, 1);
 
   return quantitativeSchema.parse({
     avgSentenceLength,
