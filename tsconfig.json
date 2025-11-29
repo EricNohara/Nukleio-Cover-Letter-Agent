@@ -5,7 +5,7 @@
     "outDir": "./dist",
     // Node environment
     "target": "ES2020",
-    "module": "ESNext",
+    "module": "NodeNext",
     "lib": [
       "ES2020"
     ],
