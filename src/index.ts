@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { runPipeline } from "./pipeline";
+import { runPipeline, runRevisionPipeline } from "./pipeline";
 
 // use zod to validate input JSON
 const inputSchema = z.object({
@@ -23,6 +23,11 @@ const inputSchema = z.object({
   writingSample: z.string().optional(),
 });
 
+const userRevisionSchema = z.object({
+  conversationId: z.string(),
+  feedback: z.string(),
+});
+
 // main entrypoint for AWS lambda function
 export const handler: APIGatewayProxyHandler = async (event) => {
   try {
@@ -36,6 +41,28 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify(result),
+    };
+  } catch (err: any) {
+    console.error(err);
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ success: false, error: err.message }),
+    };
+  }
+};
+
+// ========== REVISION HANDLER ==========
+
+export const reviseHandler: APIGatewayProxyHandler = async (event) => {
+  try {
+    const body = JSON.parse(event.body || "{}");
+    const input = userRevisionSchema.parse(body);
+
+    const revised = await runRevisionPipeline(input);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(revised),
     };
   } catch (err: any) {
     console.error(err);
