@@ -33,10 +33,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     if (route === "/revise") {
       const input = reviseSchema.parse(body);
-      const result = await runRevisionPipeline(input);
+      const pdfBuffer = await runRevisionPipeline(input);
+
       return {
         statusCode: 200,
-        body: JSON.stringify(result),
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'inline; filename="cover_letter.pdf"',
+        },
+        isBase64Encoded: true,
+        body: pdfBuffer.toString("base64"),
       };
     }
 
