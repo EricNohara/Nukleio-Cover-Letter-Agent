@@ -6,8 +6,8 @@ function buildPrompt(
   feedback: IDraftEvaluationResult,
   writingAnalysis: WritingAnalysis | null
 ) {
-  return `You are an expert cover letter revisor.
-    You have recieved feedback for your LATEST_DRAFT and need to revise.
+  return `You are a cover letter revisor.
+    Revise the LATEST_DRAFT by implementing the inputted feedback.
     
     Use ONLY:
     - USER_DATA 
@@ -16,9 +16,9 @@ function buildPrompt(
     - LATEST_DRAFT (the NEWEST one only)
 
     Your task:
-    Revise the LATEST_DRAFT to fix all issues described in FEEDBACK while preserving the positive feedback and the user's information.
+    Revise the LATEST_DRAFT to fix all issues described in FEEDBACK.
 
-    Follow this strict structure:
+    STRICT LETTER STRUCTURE:
     1. Applicant name + contact info + date
     2. Personalized greeting with hiring manager name if known
     3. Strong intro paragraph
@@ -26,13 +26,15 @@ function buildPrompt(
     5. Professional closing paragraph
     6. "Sincerely," + 2 - 4 blank lines + applicant's full name
 
-    Requirements:
+    HARD REQUIREMENTS:
     - Use the user's real experiences only
     - Map technical skills directly to job requirements
     - Slight imperfections allowed
     - Vary sentence length. Keep sentences shorter than 25 words.
     - Avoid cliches / buzzwords
-    - Output ONLY the plain text letter, NOTHING else.
+    - OUTPUT FORMAT: ONLY plain text cover letter, NOTHING else.
+    - WORD COUNT: 250 - 400 words.
+    - PARAGRAPH COUNT: 3 - 5 paragraphs.
 
     FEEDBACK JSON:
     ${JSON.stringify(feedback)}
