@@ -10,7 +10,7 @@ export function generateCoverLetterPdf(text: string): Promise<Buffer> {
       doc.on("end", () => resolve(Buffer.concat(chunks)));
       doc.on("error", reject);
 
-      doc.font("Times-Roman").fontSize(10);
+      doc.font("Times-Roman").fontSize(11);
 
       doc.text(text, {
         align: "left",
