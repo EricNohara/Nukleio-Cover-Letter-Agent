@@ -44,9 +44,6 @@ export async function objectiveEvaluator(
   const paragraphCount = paragraphs.length;
   const avgSentenceLength =
     sentences.length > 0 ? wordCount / sentences.length : 0;
-  const longSentenceCount = sentences.filter(
-    (s) => s.split(/\s+/).length > 30
-  ).length;
 
   // Must include greeting
   const greetingMatch = text.match(/Dear\s+([^,]+),/i);
@@ -142,14 +139,9 @@ export async function objectiveEvaluator(
     issues.push("Average sentence length too high (should be under 30 words).");
   }
 
-  if (longSentenceCount > 2) {
-    issues.push("Contains too many overly long sentences (max 2 allowed).");
-  }
-
   // DETECT CLICHE PHRASES TO AVOID - gotten from researching phrases to avoid
   const clichePhrases = [
     "to whom it may concern",
-    "my name is",
     "i'm writing to apply",
     "ever since i was little",
     "ever since i was young",
@@ -175,10 +167,7 @@ export async function objectiveEvaluator(
     "i will fix things",
     "i am writing to express my interest",
     "i believe i would be a great fit",
-    "please consider my application",
-    "i am passionate about",
     "i am excited to apply",
-    "i'm excited to apply",
     "thank you for your time and consideration",
   ];
 
@@ -195,7 +184,6 @@ export async function objectiveEvaluator(
       wordCount,
       paragraphCount,
       avgSentenceLength,
-      longSentenceCount,
     },
   };
 }

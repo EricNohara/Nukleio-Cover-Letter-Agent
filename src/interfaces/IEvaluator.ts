@@ -5,7 +5,6 @@ export interface IObjectiveEvaluationResult {
     wordCount: number;
     paragraphCount: number;
     avgSentenceLength: number;
-    longSentenceCount: number;
   };
 }
 
