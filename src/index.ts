@@ -1,5 +1,9 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { runPipeline, runRevisionPipeline } from "./pipeline";
+import {
+  runDescriptionPipeline,
+  runPipeline,
+  runRevisionPipeline,
+} from "./pipeline";
 
 import { z } from "zod";
 
@@ -8,6 +12,12 @@ const generateSchema = z.object({
   jobUrl: z.string().url(),
   jobTitle: z.string(),
   companyName: z.string(),
+  writingSample: z.string().optional(),
+});
+
+const generateFromDescriptionSchema = z.object({
+  userId: z.string(),
+  jobDescriptionDump: z.string(),
   writingSample: z.string().optional(),
 });
 
@@ -38,6 +48,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     if (route === "/generate") {
       const input = generateSchema.parse(body);
       const result = await runPipeline(input);
+      return {
+        statusCode: 200,
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify(result),
+      };
+    }
+
+    if (route === "/generateFromDescription") {
+      const input = generateFromDescriptionSchema.parse(body);
+      const result = await runDescriptionPipeline(input);
       return {
         statusCode: 200,
         headers: { "Access-Control-Allow-Origin": "*" },

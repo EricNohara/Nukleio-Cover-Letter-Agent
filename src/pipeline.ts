@@ -12,44 +12,20 @@ import revisionAgent from "./agents/revisionAgent";
 import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 import userRevisionAgent from "./agents/userRevisionAgent";
 import { generateCoverLetterPdf } from "./utils/pdf/pdf";
+import jobDescriptionParserAgent from "./agents/jobDescriptionParserAgent";
+import OpenAI from "openai";
 
-// pipeline for agentic workflow
-export async function runPipeline({
-  userId,
-  jobUrl,
-  jobTitle,
-  companyName,
+async function runCorePipeline({
+  clientOpenAI,
+  userData,
+  jobData,
   writingSample,
 }: {
-  userId: string;
-  jobUrl: string;
-  jobTitle: string;
-  companyName: string;
+  clientOpenAI: OpenAI;
+  userData: IUserInfo;
+  jobData: ITheirStackJob;
   writingSample?: string | undefined;
 }) {
-  // get OpenAI Client
-  const clientOpenAI = getOpenAIClient();
-
-  // retrieve user data
-  const userData: IUserInfo | null = await getUserData(userId);
-
-  if (!userData) {
-    throw new Error(`User with id ${userId} not found.`);
-  }
-
-  // invoke job research agent
-  const jobData: ITheirStackJob | null = await extractJobFromUrl(
-    jobUrl,
-    jobTitle,
-    companyName
-  );
-
-  if (!jobData) {
-    throw new Error(
-      "No job data found! Please ensure the job title and company names are correct and that the entered job was posted within the last 120 days."
-    );
-  }
-
   // invoke writing analysis agent
   const cleanedWritingSample = writingSample
     ? writingSample.replace(/\s+/g, " ").trim()
@@ -130,6 +106,92 @@ export async function runPipeline({
   return { currentDraft, conversationId };
 }
 
+// pipeline for job research agentic workflow
+export async function runPipeline({
+  userId,
+  jobUrl,
+  jobTitle,
+  companyName,
+  writingSample,
+}: {
+  userId: string;
+  jobUrl: string;
+  jobTitle: string;
+  companyName: string;
+  writingSample?: string | undefined;
+}) {
+  // get OpenAI Client
+  const clientOpenAI = getOpenAIClient();
+
+  // retrieve user data
+  const userData: IUserInfo | null = await getUserData(userId);
+
+  if (!userData) {
+    throw new Error(`User with id ${userId} not found.`);
+  }
+
+  // invoke job research agent
+  const jobData: ITheirStackJob | null = await extractJobFromUrl(
+    jobUrl,
+    jobTitle,
+    companyName
+  );
+
+  if (!jobData) {
+    throw new Error(
+      "No job data found! Please ensure the job title and company names are correct and that the entered job was posted within the last 120 days."
+    );
+  }
+
+  return await runCorePipeline({
+    clientOpenAI,
+    userData,
+    jobData,
+    writingSample,
+  });
+}
+
+// pipeline for job description pipeline
+export async function runDescriptionPipeline({
+  userId,
+  jobDescriptionDump,
+  writingSample,
+}: {
+  userId: string;
+  jobDescriptionDump: string;
+  writingSample?: string | undefined;
+}) {
+  // get OpenAI Client
+  const clientOpenAI = getOpenAIClient();
+
+  // retrieve user data
+  const userData: IUserInfo | null = await getUserData(userId);
+
+  if (!userData) {
+    throw new Error(`User with id ${userId} not found.`);
+  }
+
+  // invoke job description parser
+  const jobData: ITheirStackJob = await jobDescriptionParserAgent(
+    clientOpenAI,
+    jobDescriptionDump
+  );
+
+  if (!jobData) {
+    throw new Error(
+      "No job data found! Please ensure the job description you entered is correct!."
+    );
+  }
+
+  return await runCorePipeline({
+    clientOpenAI,
+    userData,
+    jobData,
+    writingSample,
+  });
+}
+
+// for user revisions
 export async function runRevisionPipeline({
   conversationId,
   feedback,
