@@ -29,6 +29,12 @@ ${
     : ""
 }
 
+${
+  writingAnalysis
+    ? "Note: matching the writing style of the draft to the WRITING_SAMPLE is VERY important."
+    : ""
+}
+
 Return ONLY valid JSON in this EXACT shape:
 
 {
