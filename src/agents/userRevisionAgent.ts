@@ -13,6 +13,7 @@ export default async function userRevisionAgent(
   - USER_DATA 
   - JOB_DATA 
   - WRITING_ANALYSIS (if available)
+  - WRITING_SAMPLE (if available)
   - LATEST_DRAFT (the NEWEST one only)
 
   Your task:
@@ -32,6 +33,7 @@ export default async function userRevisionAgent(
   - Slight imperfections allowed
   - Vary sentence length. Keep sentences shorter than 25 words.
   - Avoid cliches / buzzwords
+  - Use the same writing style and tone as the inputted writing sample and the analysis of the sample if available.
   - OUTPUT FORMAT: ONLY plain text cover letter, NOTHING else.
   - WORD COUNT: 250 - 400 words.
   - PARAGRAPH COUNT: 3 - 5 paragraphs.

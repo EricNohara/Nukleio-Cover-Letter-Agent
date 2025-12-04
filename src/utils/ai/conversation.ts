@@ -11,7 +11,8 @@ export async function createConversation(
   clientOpenAI: OpenAI,
   userData: IUserInfo,
   jobData: ITheirStackJob,
-  writingAnalysis: WritingAnalysis | null
+  writingAnalysis: WritingAnalysis | null,
+  writingSample: string | null
 ): Promise<string> {
   const items: ConversationCreateParams["items"] = [
     {
@@ -40,6 +41,17 @@ export async function createConversation(
       content: [
         { type: "input_text", text: "WRITING_ANALYSIS:" },
         { type: "input_text", text: JSON.stringify(writingAnalysis) },
+      ],
+    });
+  }
+
+  if (writingSample !== null) {
+    items.push({
+      type: "message",
+      role: "system",
+      content: [
+        { type: "input_text", text: "WRITING_SAMPLE:" },
+        { type: "input_text", text: JSON.stringify(writingSample.trim()) },
       ],
     });
   }

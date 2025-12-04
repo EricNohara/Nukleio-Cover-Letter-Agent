@@ -13,6 +13,7 @@ function buildPrompt(
     - USER_DATA 
     - JOB_DATA 
     ${writingAnalysis ? "- WRITING_ANALYSIS" : ""}
+    ${writingAnalysis ? "- WRITING_SAMPLE" : ""}
     - LATEST_DRAFT (the NEWEST one only)
 
     Your task:
@@ -32,6 +33,11 @@ function buildPrompt(
     - Slight imperfections allowed
     - Vary sentence length. Keep sentences shorter than 25 words.
     - Avoid cliches / buzzwords
+    ${
+      writingAnalysis
+        ? "- Use the same writing style and tone as the inputted writing sample and the analysis of the sample."
+        : ""
+    }
     - OUTPUT FORMAT: ONLY plain text cover letter, NOTHING else.
     - WORD COUNT: 250 - 400 words.
     - PARAGRAPH COUNT: 3 - 5 paragraphs.

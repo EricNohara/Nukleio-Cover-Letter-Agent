@@ -51,8 +51,12 @@ export async function runPipeline({
   }
 
   // invoke writing analysis agent
-  const writingAnalysis: WritingAnalysis | null = writingSample
-    ? await writingAnalysisAgent(clientOpenAI, writingSample)
+  const cleanedWritingSample = writingSample
+    ? writingSample.replace(/\s+/g, " ").trim()
+    : null;
+
+  const writingAnalysis: WritingAnalysis | null = cleanedWritingSample
+    ? await writingAnalysisAgent(clientOpenAI, cleanedWritingSample)
     : null;
 
   // create a conversation to reuse past inputted data
@@ -60,7 +64,8 @@ export async function runPipeline({
     clientOpenAI,
     userData,
     jobData,
-    writingAnalysis
+    writingAnalysis,
+    cleanedWritingSample ?? null
   );
 
   // invoke cover letter first draft agent

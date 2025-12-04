@@ -16,12 +16,18 @@ Use ONLY:
 - USER_DATA 
 - JOB_DATA 
 ${writingAnalysis ? "- WRITING_ANALYSIS" : ""}
+${writingAnalysis ? "- WRITING_SAMPLE" : ""}
 - LATEST_DRAFT (the NEWEST one only)
 
 Your evaluation must address:
 - clarity, impact, readability, professionalism
 - relevance to the job description
 - technical alignment with the role
+${
+  writingAnalysis
+    ? "- how well the draft matches the style of the WRITING_SAMPLE"
+    : ""
+}
 
 Return ONLY valid JSON in this EXACT shape:
 
