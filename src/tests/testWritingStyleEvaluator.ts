@@ -18,7 +18,7 @@ function loadJSON<T>(file: string): T {
 const test = async () => {
   const clientOpenAI: OpenAI = getOpenAIClient();
   const writingAnalysis: WritingAnalysis = loadJSON<WritingAnalysis>(
-    "writingAnalysis.json"
+    "writingAnalysis.json",
   );
   const output: IWritingStyleEvaluationResult | null =
     await writingStyleEvaluator(clientOpenAI, draft, writingAnalysis);
