@@ -11,9 +11,10 @@ import revisionAgent from "./agents/revisionAgent";
 import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 import userRevisionAgent from "./agents/userRevisionAgent";
 import { generateCoverLetterPdf } from "./utils/pdf/pdf";
-import jobDescriptionParserAgent from "./agents/jobResearchAgent";
 import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
+
+const MAX_ITERATIONS = 2;
 
 async function runCorePipeline({
   clientOpenAI,
@@ -56,7 +57,6 @@ async function runCorePipeline({
 
   // evaluation feedback loop
   let iterationCount = 0;
-  const maxIterations = 3;
   let lastEvaluation: IDraftEvaluationResult;
 
   while (true) {
@@ -87,7 +87,7 @@ async function runCorePipeline({
 
     if (isPassed) break; // success
 
-    if (iterationCount >= maxIterations) break; // stop looping
+    if (iterationCount >= MAX_ITERATIONS) break; // stop looping
 
     iterationCount++;
 
