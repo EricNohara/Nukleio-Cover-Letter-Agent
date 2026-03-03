@@ -2,6 +2,11 @@ import OpenAI from "openai";
 import { ITheirStackJob } from "../interfaces/ITheirStackResponse";
 import cleanLLMOutput from "../utils/ai/cleanLLMResponse";
 
+// DO NOT include job title or company name
+type LLMExtractedJob = Omit<ITheirStackJob, "job_title" | "company_object"> & {
+  company_object: Omit<ITheirStackJob["company_object"], "name">;
+};
+
 function generatePrompt(jobDescriptionDump: string) {
   return `You are a job description extraction system.
 
@@ -16,7 +21,6 @@ TARGET JSON SCHEMA (fill all fields):
   "url": string | null,
   "final_url": string | null,
   "source_url": string | null,
-  "job_title": string,
   "remote": boolean | null,
   "hybrid": boolean | null,
   "seniority": string | null,
@@ -31,7 +35,6 @@ TARGET JSON SCHEMA (fill all fields):
   "technology_slugs": string[],
   "description": string,
   "company_object": {
-    "name": string,
     "industry": string | null,
     "long_description": string | null
   },
@@ -51,9 +54,16 @@ ${jobDescriptionDump}
   `.trim();
 }
 
-export default async function jobDescriptionParserAgent(
+function parseLLMJson<T>(raw: string): T {
+  const cleaned = cleanLLMOutput(raw);
+  return JSON.parse(cleaned) as T;
+}
+
+export default async function jobResearchAgent(
   clientOpenAI: OpenAI,
-  jobDescriptionDump: string
+  jobDescriptionDump: string,
+  jobTitle: string,
+  companyName: string,
 ): Promise<ITheirStackJob> {
   const prompt = generatePrompt(jobDescriptionDump);
 
@@ -72,13 +82,22 @@ export default async function jobDescriptionParserAgent(
     throw new Error("No response from LLM during writing style analysis");
   }
 
-  let jobData: ITheirStackJob;
+  let extracted: LLMExtractedJob;
   try {
-    const cleaned = cleanLLMOutput(rawOutput);
-    jobData = JSON.parse(cleaned);
+    extracted = parseLLMJson<LLMExtractedJob>(rawOutput);
   } catch (err) {
-    throw new Error(`Failed to parse LLM output as JSON: ${err}`);
+    throw new Error(`Failed to parse LLM output as JSON: ${String(err)}`);
   }
+
+  const jobData: ITheirStackJob = {
+    ...extracted,
+    job_title: jobTitle,
+    company_object: {
+      name: companyName,
+      industry: extracted.company_object?.industry ?? null,
+      long_description: extracted.company_object?.long_description ?? null,
+    },
+  };
 
   return jobData;
 }

@@ -2,7 +2,6 @@ import getUserData from "./utils/nukleio/getUserData";
 import writingAnalysisAgent from "./agents/writingAnalysisAgent";
 import { WritingAnalysis } from "./utils/writing/writingSchema";
 import getOpenAIClient from "./utils/ai/getOpenAIClient";
-import { extractJobFromUrl } from "./utils/web/extractJobFromUrl";
 import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
@@ -12,8 +11,9 @@ import revisionAgent from "./agents/revisionAgent";
 import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 import userRevisionAgent from "./agents/userRevisionAgent";
 import { generateCoverLetterPdf } from "./utils/pdf/pdf";
-import jobDescriptionParserAgent from "./agents/jobDescriptionParserAgent";
+import jobDescriptionParserAgent from "./agents/jobResearchAgent";
 import OpenAI from "openai";
+import jobResearchAgent from "./agents/jobResearchAgent";
 
 async function runCorePipeline({
   clientOpenAI,
@@ -41,14 +41,14 @@ async function runCorePipeline({
     userData,
     jobData,
     writingAnalysis,
-    cleanedWritingSample ?? null
+    cleanedWritingSample ?? null,
   );
 
   // invoke cover letter first draft agent
   let currentDraft: string = await firstDraftAgent(
     clientOpenAI,
     conversationId,
-    writingAnalysis
+    writingAnalysis,
   );
 
   // store the draft in the conversation
@@ -67,7 +67,7 @@ async function runCorePipeline({
       currentDraft,
       userData,
       jobData,
-      writingAnalysis
+      writingAnalysis,
     );
 
     // Determine pass/fail
@@ -79,7 +79,7 @@ async function runCorePipeline({
 
     const stylePass = lastEvaluation.writingStyleEvaluation
       ? lastEvaluation.writingStyleEvaluation.deviations.every(
-          (d) => d.severity !== "high"
+          (d) => d.severity !== "high",
         )
       : true;
 
@@ -96,7 +96,7 @@ async function runCorePipeline({
       clientOpenAI,
       conversationId,
       lastEvaluation,
-      writingAnalysis
+      writingAnalysis,
     );
 
     // store latest draft in the conversation
@@ -109,55 +109,14 @@ async function runCorePipeline({
 // pipeline for job research agentic workflow
 export async function runPipeline({
   userId,
-  jobUrl,
   jobTitle,
   companyName,
-  writingSample,
-}: {
-  userId: string;
-  jobUrl: string;
-  jobTitle: string;
-  companyName: string;
-  writingSample?: string | undefined;
-}) {
-  // get OpenAI Client
-  const clientOpenAI = getOpenAIClient();
-
-  // retrieve user data
-  const userData: IUserInfo | null = await getUserData(userId);
-
-  if (!userData) {
-    throw new Error(`User with id ${userId} not found.`);
-  }
-
-  // invoke job research agent
-  const jobData: ITheirStackJob | null = await extractJobFromUrl(
-    jobUrl,
-    jobTitle,
-    companyName
-  );
-
-  if (!jobData) {
-    throw new Error(
-      "No job data found! Please ensure the job title and company names are correct and that the entered job was posted within the last 120 days."
-    );
-  }
-
-  return await runCorePipeline({
-    clientOpenAI,
-    userData,
-    jobData,
-    writingSample,
-  });
-}
-
-// pipeline for job description pipeline
-export async function runDescriptionPipeline({
-  userId,
   jobDescriptionDump,
   writingSample,
 }: {
   userId: string;
+  jobTitle: string;
+  companyName: string;
   jobDescriptionDump: string;
   writingSample?: string | undefined;
 }) {
@@ -171,16 +130,16 @@ export async function runDescriptionPipeline({
     throw new Error(`User with id ${userId} not found.`);
   }
 
-  // invoke job description parser
-  const jobData: ITheirStackJob = await jobDescriptionParserAgent(
+  // invoke job research agent
+  const jobData: ITheirStackJob = await jobResearchAgent(
     clientOpenAI,
-    jobDescriptionDump
+    jobDescriptionDump,
+    jobTitle,
+    companyName,
   );
 
   if (!jobData) {
-    throw new Error(
-      "No job data found! Please ensure the job description you entered is correct!."
-    );
+    throw new Error("Failed to research inputted job. Please try again.");
   }
 
   return await runCorePipeline({
@@ -208,7 +167,7 @@ export async function runRevisionPipeline({
     const finalDraft = await userRevisionAgent(
       clientOpenAI,
       conversationId,
-      feedback
+      feedback,
     );
 
     // convert the text into pdf
