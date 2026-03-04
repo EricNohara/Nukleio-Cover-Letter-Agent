@@ -13,6 +13,7 @@ import userRevisionAgent from "./agents/userRevisionAgent";
 import { generateCoverLetterPdf } from "./utils/pdf/pdf";
 import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
+import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 
 const MAX_ITERATIONS = 2;
 
@@ -103,7 +104,13 @@ async function runCorePipeline({
     await storeLatestDraft(clientOpenAI, conversationId, currentDraft);
   }
 
-  return { currentDraft, conversationId };
+  // calculate skills match score
+  const skillsMatchScore = await skillsMatchEvaluatorAgent(
+    clientOpenAI,
+    conversationId,
+  );
+
+  return { currentDraft, conversationId, skillsMatchScore };
 }
 
 // pipeline for job research agentic workflow
