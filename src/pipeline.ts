@@ -10,10 +10,10 @@ import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
 import revisionAgent from "./agents/revisionAgent";
 import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 import userRevisionAgent from "./agents/userRevisionAgent";
-import { generateCoverLetterPdf } from "./utils/pdf/pdf";
 import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
 import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
+import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
 
 const MAX_ITERATIONS = 2;
 
@@ -161,29 +161,25 @@ export async function runPipeline({
 export async function runRevisionPipeline({
   conversationId,
   feedback,
-  finalLetter,
 }: {
   conversationId: string;
   feedback: string;
-  finalLetter?: string | undefined;
 }) {
   const clientOpenAI = getOpenAIClient();
 
-  if (!finalLetter) {
-    // generate the final draft
-    const finalDraft = await userRevisionAgent(
-      clientOpenAI,
-      conversationId,
-      feedback,
-    );
+  // generate the revised draft
+  const revisedDraft = await userRevisionAgent(
+    clientOpenAI,
+    conversationId,
+    feedback,
+  );
 
-    // convert the text into pdf
-    const pdfBuffer = await generateCoverLetterPdf(finalDraft);
+  // generate the draft name from revision
+  const draftName = await revisionDraftNamingAgent(
+    clientOpenAI,
+    conversationId,
+    feedback,
+  );
 
-    // return the pdf
-    return pdfBuffer;
-  } else {
-    const pdfBuffer = await generateCoverLetterPdf(finalLetter);
-    return pdfBuffer;
-  }
+  return { revisedDraft, draftName };
 }

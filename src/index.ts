@@ -47,17 +47,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     if (route === "/revise") {
       const input = reviseSchema.parse(body);
-      const pdfBuffer = await runRevisionPipeline(input);
-
+      const result = await runRevisionPipeline(input);
       return {
         statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/pdf",
-          "Content-Disposition": 'inline; filename="cover_letter.pdf"',
-        },
-        isBase64Encoded: true,
-        body: pdfBuffer.toString("base64"),
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify(result),
       };
     }
 
