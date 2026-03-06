@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
     paths:
       - "apps/coverLetterAgent/**"
       - ".github/workflows/deployCoverLetterAgent.yml"
@@ -50,7 +51,7 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
-          function_name: Nukleio-Cover-Letter-Agent
+          function_name: ${{ github.ref_name == 'main' && 'Nukleio-Cover-Letter-Agent' || 'Nukleio-Cover-Letter-Agent-Dev' }}
           zip_file: apps/coverLetterAgent/function.zip
           runtime: nodejs20.x
           handler: dist/index.handler
