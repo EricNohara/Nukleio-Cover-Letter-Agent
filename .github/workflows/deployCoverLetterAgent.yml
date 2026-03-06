@@ -32,17 +32,16 @@ jobs:
         run: npm ci
 
       - name: Build TypeScript
-        run: npm run build
+        run: npm run build --workspace=apps/coverLetterAgent
 
       - name: Prepare deployment package
         run: |
-          rm -rf package function.zip
-          npm ci --omit=dev
-          mkdir package
-          cp -r dist/* package/
-          cp package.json package/
-          cp -r node_modules package/
-          cd package
+          rm -rf apps/coverLetterAgent/package apps/coverLetterAgent/function.zip
+          mkdir apps/coverLetterAgent/package
+          cp -r apps/coverLetterAgent/dist/* apps/coverLetterAgent/package/
+          cp apps/coverLetterAgent/package.json apps/coverLetterAgent/package/
+          cp -r node_modules apps/coverLetterAgent/package/
+          cd apps/coverLetterAgent/package
           zip -r ../function.zip .
 
       - name: Deploy to AWS Lambda
@@ -54,6 +53,6 @@ jobs:
           function_name: ${{ github.ref_name == 'main' && 'Nukleio-Cover-Letter-Agent' || 'Nukleio-Cover-Letter-Agent-Dev' }}
           zip_file: apps/coverLetterAgent/function.zip
           runtime: nodejs20.x
-          handler: dist/index.handler
+          handler: index.handler
           memory_size: 1536
           timeout: 900
