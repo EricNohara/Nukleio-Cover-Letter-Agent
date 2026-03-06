@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install runtime dependencies only
+      - name: Install runtime dependencies
         run: npm ci
 
       - name: Build TypeScript
