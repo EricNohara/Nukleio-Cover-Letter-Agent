@@ -1,9 +1,15 @@
-name: Deploy Lambda
+name: Deploy Professional Headshot Agent
 
 on:
   push:
     branches:
       - main
+      - dev
+    paths:
+      - "apps/professionalHeadshotAgent/**"
+      - ".github/workflows/deployProfessionalHeadshotAgent.yml"
+
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,20 +24,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install runtime dependencies only
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build TypeScript
-        run: npm run build
+      - name: Build cover letter agent
+        run: npm run build --workspace=nukleio-professional-headshot-agent
 
       - name: Prepare deployment package
         run: |
-          npm ci --omit=dev
-          mkdir package
-          cp -r dist/* package/
-          cp package.json package/
-          cp -r node_modules package/
-          cd package
+          rm -rf apps/professionalHeadshotAgent/package apps/professionalHeadshotAgent/function.zip
+          mkdir -p apps/professionalHeadshotAgent/package
+          cp -r apps/professionalHeadshotAgent/dist/* apps/professionalHeadshotAgent/package/
+          cp apps/professionalHeadshotAgent/package.json apps/professionalHeadshotAgent/package/
+          cp -r node_modules apps/professionalHeadshotAgent/package/
+          cd apps/professionalHeadshotAgent/package
           zip -r ../function.zip .
 
       - name: Deploy to AWS Lambda
@@ -40,9 +46,9 @@ jobs:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
-          function_name: Nukleio-Cover-Letter-Agent
-          zip_file: function.zip
+          function_name: ${{ github.ref_name == 'main' && 'Nukleio-Professional-Headshot-Agent' || 'Nukleio-Professional-Headshot-Agent-Dev' }}
+          zip_file: apps/professionalHeadshotAgent/function.zip
           runtime: nodejs20.x
-          handler: dist/index.handler
+          handler: index.handler
           memory_size: 1536
           timeout: 900
