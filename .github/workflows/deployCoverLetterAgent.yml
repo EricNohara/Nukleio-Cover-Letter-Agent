@@ -1,4 +1,4 @@
-name: Deploy Lambda
+name: Deploy Cover Letter Agent
 
 on:
   push:
@@ -15,10 +15,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: apps/coverLetterAgent
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,16 +24,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install runtime dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build TypeScript
+      - name: Build cover letter agent
         run: npm run build --workspace=nukleio-cover-letter-agent
 
       - name: Prepare deployment package
         run: |
           rm -rf apps/coverLetterAgent/package apps/coverLetterAgent/function.zip
-          mkdir apps/coverLetterAgent/package
+          mkdir -p apps/coverLetterAgent/package
           cp -r apps/coverLetterAgent/dist/* apps/coverLetterAgent/package/
           cp apps/coverLetterAgent/package.json apps/coverLetterAgent/package/
           cp -r node_modules apps/coverLetterAgent/package/
