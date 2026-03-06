@@ -8,6 +8,8 @@ on:
       - "apps/coverLetterAgent/**"
       - ".github/workflows/deployCoverLetterAgent.yml"
 
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
