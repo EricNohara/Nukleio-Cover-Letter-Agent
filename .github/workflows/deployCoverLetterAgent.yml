@@ -32,7 +32,7 @@ jobs:
         run: npm ci
 
       - name: Build TypeScript
-        run: npm run build --workspace=apps/coverLetterAgent
+        run: npm run build --workspace=apps/cover-letter-agent
 
       - name: Prepare deployment package
         run: |
