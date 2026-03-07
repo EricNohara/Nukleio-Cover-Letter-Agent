@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { urlToOpenAIFile } from "../utils/urlToOpenAiFile";
+import { urlToOpenAIFile } from "../utils/urlToOpenAIFile";
 
 function buildPrompt(
   backgroundDescription: string | null,
