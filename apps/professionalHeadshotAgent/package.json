@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.927.0",
+    "@supabase/supabase-js": "^2.98.0",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "openai": "^6.9.1",
