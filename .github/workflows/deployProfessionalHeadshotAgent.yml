@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build cover letter agent
+      - name: Build professional headshot agent
         run: npm run build --workspace=nukleio-professional-headshot-agent
 
       - name: Prepare deployment package
