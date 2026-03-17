@@ -1,4 +1,8 @@
 import { generateProfessionalHeadshotAgent } from "./agents/generateProfessionalHeadshotAgent";
+import {
+  ReferencePhotoValidationResult,
+  validateReferencePhotoAgent,
+} from "./agents/validateReferencePhotoAgent";
 import getOpenAIClient from "./utils/getOpenAIClient";
 import { uploadHeadshotToSupabase } from "./utils/uploadHeadshotToSupabase";
 
@@ -15,6 +19,19 @@ export async function runPipeline({
   backgroundUrl?: string | undefined;
   layout: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 }) {
+  // validate the reference image
+  const validation: ReferencePhotoValidationResult =
+    await validateReferencePhotoAgent(openAIClient, referenceUrl);
+
+  if (!validation.ok) {
+    return {
+      success: false,
+      publicUrl: null,
+      error: "Reference image is not suitable for headshot generation.",
+      validation,
+    };
+  }
+
   // generate the professional headshot
   const headshot = await generateProfessionalHeadshotAgent(
     openAIClient,
@@ -32,6 +49,7 @@ export async function runPipeline({
       success: false,
       publicUrl: null,
       error: "OpenAI did not return image data.",
+      validation,
     };
   }
 
@@ -46,6 +64,7 @@ export async function runPipeline({
   return {
     success: publicUrl !== null,
     publicUrl,
+    validation,
   };
 }
 
