@@ -1,4 +1,5 @@
 import { DefaultResumeTemplate } from "../templates/DefaultResumeTemplate";
+import { UNCResumeTemplate } from "../templates/UNCResumeTemplate";
 
 export type ResumeTemplateId = "default";
 
@@ -6,7 +7,8 @@ export function getResumeTemplate(templateId?: string) {
   switch (templateId) {
     case "default":
       return DefaultResumeTemplate;
-    //   add in more templates later
+    case "unc":
+      return UNCResumeTemplate;
     case undefined:
     default:
       return DefaultResumeTemplate;
