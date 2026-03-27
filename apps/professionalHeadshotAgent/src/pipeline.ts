@@ -5,6 +5,7 @@ import {
 } from "./agents/validateReferencePhotoAgent";
 import getOpenAIClient from "./utils/getOpenAIClient";
 import { uploadHeadshotToSupabase } from "./utils/uploadHeadshotToSupabase";
+import { reviseProfessionalHeadshotAgent } from "./agents/reviseProfessionalHeadshotAgent";
 
 const openAIClient = getOpenAIClient();
 
@@ -77,8 +78,50 @@ export async function runRevisionPipeline({
   feedback: string;
   layout: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 }) {
-  // fetch headshot from supabase
+  // validate the reference image
+  const validation: ReferencePhotoValidationResult =
+    await validateReferencePhotoAgent(openAIClient, headshotUrl);
+
+  if (!validation.ok) {
+    return {
+      success: false,
+      publicUrl: null,
+      error: "Reference image is not suitable for headshot generation.",
+      validation,
+    };
+  }
+
   // revise the professional headshot
+  const headshot = await reviseProfessionalHeadshotAgent(
+    openAIClient,
+    headshotUrl,
+    feedback,
+    layout,
+  );
+
   // upload the headshot to supabase
+  const b64Image = headshot.data?.[0]?.b64_json ?? null;
+
+  if (!b64Image) {
+    return {
+      success: false,
+      publicUrl: null,
+      error: "OpenAI did not return image data.",
+      validation,
+    };
+  }
+
+  const imageBuffer = Buffer.from(b64Image, "base64");
+
+  const publicUrl = await uploadHeadshotToSupabase(imageBuffer, {
+    prefix: "generated",
+    contentType: "image/jpeg",
+  });
+
   // return the public url
+  return {
+    success: publicUrl !== null,
+    publicUrl,
+    validation,
+  };
 }
