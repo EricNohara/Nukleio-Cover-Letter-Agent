@@ -36,9 +36,16 @@ jobs:
           mkdir -p apps/resumeAgent/package
           cp -r apps/resumeAgent/dist/* apps/resumeAgent/package/
           cp apps/resumeAgent/package.json apps/resumeAgent/package/
-          cp -r node_modules apps/resumeAgent/package/
           cd apps/resumeAgent/package
+          npm install --omit=dev --no-package-lock
           zip -r ../function.zip .
+
+      - name: Inspect deployment artifact
+        run: |
+          ls -lh apps/resumeAgent/function.zip
+          du -sh apps/resumeAgent/package
+          du -sh apps/resumeAgent/package/node_modules
+          du -sh apps/resumeAgent/package/dist || true
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
