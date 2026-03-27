@@ -1,107 +1,83 @@
-import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import fs from "fs";
-import path from "path";
+import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { runPipeline, runEnhancementPipeline } from "./pipeline";
+import { z } from "zod";
 
-function safeListDir(dir: string) {
-  try {
-    return fs.readdirSync(dir);
-  } catch (error) {
-    return [`<error: ${(error as Error).message}>`];
-  }
-}
+const generateResumeSchema = z.object({
+  userId: z.string(),
+  templateId: z.string().optional(),
+});
 
-function safeStat(filePath: string) {
-  try {
-    const stat = fs.statSync(filePath);
-    return {
-      exists: true,
-      isFile: stat.isFile(),
-      isDir: stat.isDirectory(),
-      size: stat.size,
-    };
-  } catch {
-    return { exists: false };
-  }
-}
+const enhanceResumeSchema = z.object({
+  userId: z.string(),
+  resumeUrl: z.string(),
+  feedback: z.string().optional(),
+});
 
-function tryRequire(name: string) {
-  try {
-    const mod = require(name);
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  if (event.requestContext.http.method === "OPTIONS") {
     return {
-      found: true,
-      keys: Object.keys(mod || {}),
-    };
-  } catch (e) {
-    return {
-      found: false,
-      error: (e as Error).message,
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+      },
     };
   }
-}
 
-export const handler: APIGatewayProxyHandlerV2 = async () => {
-  const result: any = {};
+  try {
+    const route = event.rawPath;
+    const body = JSON.parse(event.body || "{}");
 
-  // 🔹 Basic environment info
-  result.env = {
-    nodeVersion: process.version,
-    platform: process.platform,
-    arch: process.arch,
-    lambdaTaskRoot: process.env.LAMBDA_TASK_ROOT,
-    awsExecEnv: process.env.AWS_EXECUTION_ENV,
-  };
+    if (route === "/generate") {
+      const input = generateResumeSchema.parse(body);
+      const result = await runPipeline(input);
 
-  // 🔹 Directory structure
-  result.directories = {
-    "/opt": safeListDir("/opt"),
-    "/opt/bin": safeListDir("/opt/bin"),
-    "/opt/nodejs": safeListDir("/opt/nodejs"),
-    "/opt/nodejs/node_modules": safeListDir("/opt/nodejs/node_modules"),
-  };
-
-  // 🔹 Look for common Chromium paths
-  const possibleChromiumPaths = [
-    "/opt/bin/chromium",
-    "/opt/bin/chromium-browser",
-    "/opt/chromium",
-    "/opt/headless-chromium",
-    "/opt/nodejs/node_modules/@sparticuz/chromium/bin/chromium",
-  ];
-
-  result.chromiumCandidates = possibleChromiumPaths.map((p) => ({
-    path: p,
-    stat: safeStat(p),
-  }));
-
-  // 🔹 Try requiring common packages
-  result.packages = {
-    puppeteer: tryRequire("puppeteer"),
-    "puppeteer-core": tryRequire("puppeteer-core"),
-    "@sparticuz/chromium": tryRequire("@sparticuz/chromium"),
-    playwright: tryRequire("playwright"),
-    "playwright-core": tryRequire("playwright-core"),
-  };
-
-  // 🔹 NODE_PATH (important for layers)
-  result.nodePath = process.env.NODE_PATH;
-
-  // 🔹 Try resolving modules manually
-  const resolveCheck = (name: string) => {
-    try {
-      return require.resolve(name);
-    } catch (e) {
-      return `<not found: ${(e as Error).message}>`;
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(result),
+      };
     }
-  };
 
-  result.resolvedPaths = {
-    puppeteer: resolveCheck("puppeteer"),
-    "puppeteer-core": resolveCheck("puppeteer-core"),
-    "@sparticuz/chromium": resolveCheck("@sparticuz/chromium"),
-  };
+    if (route === "/enhance") {
+      const input = enhanceResumeSchema.parse(body);
+      const result = await runEnhancementPipeline(input);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result, null, 2),
-  };
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(result),
+      };
+    }
+
+    return {
+      statusCode: 404,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ success: false, error: "Route not found" }),
+    };
+  } catch (err: any) {
+    console.error(err);
+
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        success: false,
+        error: err?.message ?? "Unknown error",
+      }),
+    };
+  }
 };

@@ -8,7 +8,9 @@
             "ES2020"
         ],
         "types": [
-            "node"
+            "node",
+            "react",
+            "react-dom"
         ],
         "sourceMap": true,
         "declaration": true,
@@ -18,7 +20,8 @@
         "esModuleInterop": true,
         "moduleResolution": "node",
         "skipLibCheck": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "jsx": "react-jsx"
     },
     "include": [
         "src/**/*"
