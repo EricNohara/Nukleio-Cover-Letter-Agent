@@ -202,7 +202,15 @@ export function AwesomeCVResumeTemplate({
 
                                     {exp.job_description.length > 0 && (
                                         <ul>
-                                            <li>{exp.job_description}</li>
+                                            {exp.job_description
+                                                .split(". ")
+                                                .map((description) => description.trim())
+                                                .filter(Boolean)
+                                                .map((description, i) => (
+                                                    <li key={i}>
+                                                        {description.endsWith(".") ? description : `${description}.`}
+                                                    </li>
+                                                ))}
                                         </ul>
                                     )}
                                 </div>
