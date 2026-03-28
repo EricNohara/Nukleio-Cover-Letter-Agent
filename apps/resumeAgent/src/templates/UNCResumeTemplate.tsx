@@ -189,4 +189,5 @@ export function UNCResumeTemplate({ userInfo }: { userInfo: IUserInfo }) {
     //         </body>
     //     </html>
     // );
+    return <></>;
 }

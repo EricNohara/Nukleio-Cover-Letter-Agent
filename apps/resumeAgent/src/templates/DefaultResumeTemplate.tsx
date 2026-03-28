@@ -182,4 +182,5 @@ export function DefaultResumeTemplate({
     //         </body>
     //     </html>
     // );
+    return <></>;
 }

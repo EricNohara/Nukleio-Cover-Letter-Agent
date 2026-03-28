@@ -1,5 +1,4 @@
 import getUserData from "./utils/getUserData";
-import { normalizeResumeDocument } from "./utils/cleanUserInfo";
 import { renderResumeHtml } from "./utils/renderResumeHtml";
 import { renderResumePdf } from "./utils/renderResumePdf";
 import { uploadResumeToSupabase } from "./utils/uploadResumeToSupabase";
@@ -31,17 +30,14 @@ export async function runPipeline({
     throw new Error("Error fetching user info");
   }
 
-  //   normalize user info to resume data
-  const resume = normalizeResumeDocument(userInfo);
-
   //   render the resume as HTML
-  const html = renderResumeHtml(resume, templateId);
+  const html = renderResumeHtml(userInfo, templateId);
 
   //   render the HTML resume as a PDF
   const pdfBuffer = await renderResumePdf(html);
 
   //   upload the resume to supabase and return the public url
-  const safePrefix = makeSafePrefix(userInfo.name);
+  const safePrefix = makeSafePrefix(userInfo.name ?? userInfo.email);
 
   const resumeUrl = await uploadResumeToSupabase(pdfBuffer, {
     prefix: userId,
