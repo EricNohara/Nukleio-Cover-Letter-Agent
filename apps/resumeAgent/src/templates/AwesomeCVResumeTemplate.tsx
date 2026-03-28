@@ -14,7 +14,7 @@ export function AwesomeCVResumeTemplate({
                 <style>{`
           @page {
             size: Letter;
-            margin: 0.55in 0.65in 0.6in 0.65in;
+            margin: 0.5in 0.5in 0.5in 0.5in;
           }
 
           * {
@@ -23,10 +23,10 @@ export function AwesomeCVResumeTemplate({
 
           body {
             margin: 0;
-            color: #1f2937;
+            color: black;
             font-family: "Helvetica Neue", Arial, sans-serif;
-            font-size: 11.5px;
-            line-height: 1.45;
+            font-size: 11px;
+            line-height: 1.25;
           }
 
           .page {
@@ -34,7 +34,7 @@ export function AwesomeCVResumeTemplate({
           }
 
           .header {
-            margin-bottom: 18px;
+            margin-bottom: 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -42,7 +42,7 @@ export function AwesomeCVResumeTemplate({
           }
 
           .name {
-            font-size: 40px;
+            font-size: 30px;
             font-weight: 700;
             line-height: 1.1;
             color: black;
@@ -70,12 +70,12 @@ export function AwesomeCVResumeTemplate({
           }
 
           .section {
-            margin-top: 18px;
+            margin-top: 14px;
             page-break-inside: avoid;
           }
 
           .section-title {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.2px;
