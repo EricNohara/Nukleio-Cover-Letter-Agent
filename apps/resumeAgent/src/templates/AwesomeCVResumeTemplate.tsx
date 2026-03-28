@@ -71,7 +71,6 @@ export function AwesomeCVResumeTemplate({
 
           .section {
             margin-top: 14px;
-            page-break-inside: avoid;
           }
 
           .section-title {
@@ -94,7 +93,7 @@ export function AwesomeCVResumeTemplate({
         }
 
           .entry {
-            margin-bottom: 14px;
+            margin-bottom: 8px;
             page-break-inside: avoid;
             break-inside: avoid;
           }
