@@ -85,29 +85,45 @@ function compareNullableNumbersDesc(
   return bValue - aValue;
 }
 
-function compareDatesMostRecent(
+function todayTimestamp(): number {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+}
+
+function getEffectiveEndDateValue(endDate: string | null | undefined): number {
+  const cleaned = cleanString(endDate);
+
+  // No end date means current, so treat it as today.
+  if (!cleaned) {
+    return todayTimestamp();
+  }
+
+  return parseDateValue(cleaned);
+}
+
+function compareByMostRecentEndDate(
   aEnd: string | null | undefined,
   aStart: string | null | undefined,
   bEnd: string | null | undefined,
   bStart: string | null | undefined,
 ): number {
-  const aPrimary =
-    parseDateValue(aEnd) !== Number.NEGATIVE_INFINITY
-      ? parseDateValue(aEnd)
-      : parseDateValue(aStart);
-  const bPrimary =
-    parseDateValue(bEnd) !== Number.NEGATIVE_INFINITY
-      ? parseDateValue(bEnd)
-      : parseDateValue(bStart);
+  const aEndValue = getEffectiveEndDateValue(aEnd);
+  const bEndValue = getEffectiveEndDateValue(bEnd);
 
-  if (bPrimary !== aPrimary) {
-    return bPrimary - aPrimary;
+  // Primary sort: most recent end date first.
+  if (bEndValue !== aEndValue) {
+    return bEndValue - aEndValue;
   }
 
-  const aSecondary = parseDateValue(aStart);
-  const bSecondary = parseDateValue(bStart);
+  const aStartValue = parseDateValue(aStart);
+  const bStartValue = parseDateValue(bStart);
 
-  return bSecondary - aSecondary;
+  // Tiebreaker: most recent start date first.
+  if (bStartValue !== aStartValue) {
+    return bStartValue - aStartValue;
+  }
+
+  return 0;
 }
 
 function educationRecencyValue(education: {
@@ -120,29 +136,41 @@ function educationRecencyValue(education: {
 }
 
 function gradeRank(grade: string | null | undefined): number {
-  const cleaned = cleanString(grade)?.toUpperCase();
+  const cleaned = cleanString(grade);
   if (!cleaned) return -1;
 
+  // Numeric grades like "95" or "88.5"
+  const numeric = Number(cleaned);
+  if (!Number.isNaN(numeric)) {
+    return numeric;
+  }
+
+  // Letter grades
+  const normalized = cleaned.toUpperCase().replace(/\s+/g, "");
+
   const ranks: Record<string, number> = {
-    "A+": 12,
-    A: 11,
-    "A-": 10,
-    "B+": 9,
-    B: 8,
-    "B-": 7,
-    "C+": 6,
-    C: 5,
-    "C-": 4,
-    "D+": 3,
-    D: 2,
-    "D-": 1,
+    "A+": 100,
+    A: 95,
+    "A-": 90,
+    "B+": 87,
+    B: 83,
+    "B-": 80,
+    "C+": 77,
+    C: 73,
+    "C-": 70,
+    "D+": 67,
+    D: 63,
+    "D-": 60,
     F: 0,
   };
 
-  return ranks[cleaned] ?? -1;
+  return ranks[normalized] ?? -1;
 }
 
-export function cleanUserInfo(userInfo: IUserInfo): IUserInfo {
+export function cleanUserInfo(
+  userInfo: IUserInfo,
+  keepCount: number = 3,
+): IUserInfo {
   return {
     email: cleanRequiredString(userInfo.email),
     name: cleanString(userInfo.name),
@@ -189,6 +217,8 @@ export function cleanUserInfo(userInfo: IUserInfo): IUserInfo {
         job_title: cleanRequiredString(experience.job_title),
         date_start: formatRequiredReadableDate(experience.date_start),
         date_end: formatReadableDate(experience.date_end),
+        _raw_date_start: cleanRequiredString(experience.date_start),
+        _raw_date_end: cleanString(experience.date_end),
         job_description: cleanRequiredString(experience.job_description),
       }))
       .filter(
@@ -198,37 +228,47 @@ export function cleanUserInfo(userInfo: IUserInfo): IUserInfo {
           experience.job_description.length > 0,
       )
       .sort((a, b) =>
-        compareDatesMostRecent(
-          a.date_end,
-          a.date_start,
-          b.date_end,
-          b.date_start,
+        compareByMostRecentEndDate(
+          a._raw_date_end,
+          a._raw_date_start,
+          b._raw_date_end,
+          b._raw_date_start,
         ),
-      ),
+      )
+      .map(({ _raw_date_start, _raw_date_end, ...experience }) => experience)
+      .slice(0, keepCount),
 
     projects: userInfo.projects
-      .map((project) => ({
-        name: cleanRequiredString(project.name),
-        date_start: formatRequiredReadableDate(project.date_start),
-        date_end: formatRequiredReadableDate(project.date_end),
-        languages_used: cleanStringArray(project.languages_used),
-        frameworks_used: cleanStringArray(project.frameworks_used),
-        technologies_used: cleanStringArray(project.technologies_used),
-        description: cleanRequiredString(project.description),
-        github_url: cleanString(project.github_url),
-        demo_url: cleanString(project.demo_url),
-      }))
+      .map((project) => {
+        const rawDateEnd = cleanRequiredString(project.date_end);
+
+        return {
+          name: cleanRequiredString(project.name),
+          date_start: formatRequiredReadableDate(project.date_start),
+          date_end: formatRequiredReadableDate(project.date_end),
+          _raw_date_start: cleanRequiredString(project.date_start),
+          _raw_date_end: rawDateEnd,
+          languages_used: cleanStringArray(project.languages_used),
+          frameworks_used: cleanStringArray(project.frameworks_used),
+          technologies_used: cleanStringArray(project.technologies_used),
+          description: cleanRequiredString(project.description),
+          github_url: cleanString(project.github_url),
+          demo_url: cleanString(project.demo_url),
+        };
+      })
       .filter(
         (project) => project.name.length > 0 || project.description.length > 0,
       )
       .sort((a, b) =>
-        compareDatesMostRecent(
-          a.date_end,
-          a.date_start,
-          b.date_end,
-          b.date_start,
+        compareByMostRecentEndDate(
+          a._raw_date_end,
+          a._raw_date_start,
+          b._raw_date_end,
+          b._raw_date_start,
         ),
-      ),
+      )
+      .map(({ _raw_date_start, _raw_date_end, ...project }) => project)
+      .slice(0, keepCount),
 
     education: userInfo.education
       .map((education) => ({
@@ -271,6 +311,7 @@ export function cleanUserInfo(userInfo: IUserInfo): IUserInfo {
         if (secondary !== 0) return secondary;
 
         return a.institution.localeCompare(b.institution);
-      }),
+      })
+      .slice(0, keepCount),
   };
 }
