@@ -1,3 +1,4 @@
+import { AwesomeCVResumeTemplate } from "../templates/AwesomeCVResumeTemplate";
 import { DefaultResumeTemplate } from "../templates/DefaultResumeTemplate";
 import { UNCResumeTemplate } from "../templates/UNCResumeTemplate";
 
@@ -9,6 +10,8 @@ export function getResumeTemplate(templateId?: string) {
       return DefaultResumeTemplate;
     case "unc":
       return UNCResumeTemplate;
+    case "awesomecv":
+      return AwesomeCVResumeTemplate;
     case undefined:
     default:
       return DefaultResumeTemplate;
