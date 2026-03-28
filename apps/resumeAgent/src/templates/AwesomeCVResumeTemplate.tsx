@@ -1,5 +1,6 @@
 import React from "react";
 import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { GitHubIcon, LinkedInIcon, LinkIcon, MailIcon, PhoneIcon } from "../utils/IconLibrary";
 
 export function AwesomeCVResumeTemplate({
     userInfo,
@@ -62,6 +63,10 @@ export function AwesomeCVResumeTemplate({
           .contact {
             font-size: 11px;
             line-height: 1.5;
+            display: flex;
+            align-items:center;
+            justify-content: center;
+            gap: 6px;
           }
 
           .section {
@@ -155,6 +160,31 @@ export function AwesomeCVResumeTemplate({
             color: inherit;
             text-decoration: none;
           }
+
+          .contact a {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .project-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: black;
+            margin: 0;
+        }
+
+        .project-title a {
+            display: inline-flex;
+            align-items: center;
+        }
+
+            .project-title svg {
+            display: block;
+        }
         `}</style>
             </head>
             <body>
@@ -174,9 +204,45 @@ export function AwesomeCVResumeTemplate({
                         {userInfo.current_address && <div className="address">{userInfo.current_address}</div>}
 
                         <div className="contact">
-                            {[userInfo.phone_number, userInfo.email, userInfo.github_url, userInfo.linkedin_url]
-                                .filter(Boolean)
-                                .join(" | ")}
+                            {
+                                userInfo.phone_number &&
+                                <>
+                                    <a href={`tel:${userInfo.phone_number}`} target="_blank" rel="noopener noreferrer">
+                                        <PhoneIcon />
+                                        {userInfo.phone_number}
+                                    </a>
+                                    {" | "}
+                                </>
+                            }
+                            {
+                                userInfo.email &&
+                                <>
+                                    <a href={`mailto:${userInfo.email}`} target="_blank" rel="noopener noreferrer">
+                                        <MailIcon />
+                                        {userInfo.email}
+                                    </a>
+                                    {" | "}
+                                </>
+                            }
+                            {
+                                userInfo.github_url &&
+                                <>
+                                    <a href={userInfo.github_url} target="_blank" rel="noopener noreferrer">
+                                        <GitHubIcon />
+                                        GitHub
+                                    </a>
+                                    {" | "}
+                                </>
+                            }
+                            {
+                                userInfo.linkedin_url &&
+                                <>
+                                    <a href={userInfo.linkedin_url} target="_blank" rel="noopener noreferrer">
+                                        <LinkedInIcon />
+                                        LinkedIn
+                                    </a>
+                                </>
+                            }
                         </div>
                     </header>
 
@@ -229,8 +295,26 @@ export function AwesomeCVResumeTemplate({
                                 <div className="entry" key={i}>
                                     <div className="entry-top">
                                         <div>
-                                            <div className="entry-title">{project.name}</div>
-                                            <div className="entry-subtitle">{project.languages_used?.join(" | ")}</div>
+                                            <div className="project-title">
+                                                {project.name}
+                                                {
+                                                    project.github_url &&
+                                                    <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                                                        <GitHubIcon size={18} />
+                                                    </a>
+                                                }
+                                                {
+                                                    project.demo_url &&
+                                                    <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
+                                                        <LinkIcon size={18} />
+                                                    </a>
+                                                }
+                                            </div>
+                                            <div className="entry-subtitle">
+                                                {project.languages_used?.join(" | ")}
+                                                {project.frameworks_used?.join(" | ")}
+                                                {project.technologies_used?.join(" | ")}
+                                            </div>
                                         </div>
                                         <div className="entry-date">
                                             {project.date_start} - {project.date_end ?? "Present"}
@@ -239,7 +323,15 @@ export function AwesomeCVResumeTemplate({
 
                                     {project.description.length > 0 && (
                                         <ul>
-                                            <li>{project.description}</li>
+                                            {project.description
+                                                .split(". ")
+                                                .map((description) => description.trim())
+                                                .filter(Boolean)
+                                                .map((description, i) => (
+                                                    <li key={i}>
+                                                        {description.endsWith(".") ? description : `${description}.`}
+                                                    </li>
+                                                ))}
                                         </ul>
                                     )}
                                 </div>
@@ -259,12 +351,29 @@ export function AwesomeCVResumeTemplate({
                                     <div className="entry-top">
                                         <div>
                                             <div className="entry-title">{edu.institution}</div>
-                                            <div className="entry-subtitle">{edu.degree}</div>
+                                            <div className="entry-subtitle">
+                                                {[
+                                                    edu.degree,
+                                                    ...edu.majors,
+                                                    ...edu.minors,
+                                                    `GPA: ${edu.gpa}`,
+                                                    ...edu.awards,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(" | ")}
+                                            </div>
                                         </div>
                                         <div className="entry-date">
                                             {edu.year_start} - {edu.year_end ?? "Present"}
                                         </div>
                                     </div>
+                                    {edu.courses.length > 0 &&
+                                        <ul>
+                                            <li>
+                                                {edu.courses.map((c) => c.description).join(", ")}
+                                            </li>
+                                        </ul>
+                                    }
                                 </div>
                             ))}
                         </section>
@@ -276,7 +385,7 @@ export function AwesomeCVResumeTemplate({
                                 Skills
                                 <div className="section-divider" />
                             </div>
-                            <div className="skills-list">{userInfo.skills.join(", ")}</div>
+                            <div className="skills-list">{userInfo.skills.map((s) => s.name).join(", ")}</div>
                         </section>
                     )}
                 </div>
