@@ -1,5 +1,5 @@
 import getUserData from "./utils/getUserData";
-import { normalizeResumeDocument } from "./utils/normalizeResumeDocument";
+import { normalizeResumeDocument } from "./utils/cleanUserInfo";
 import { renderResumeHtml } from "./utils/renderResumeHtml";
 import { renderResumePdf } from "./utils/renderResumePdf";
 import { uploadResumeToSupabase } from "./utils/uploadResumeToSupabase";

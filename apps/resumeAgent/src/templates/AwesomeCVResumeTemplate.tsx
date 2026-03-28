@@ -1,10 +1,10 @@
 import React from "react";
-import { IResumeDocument } from "../interfaces/IResumeDocument";
+import { IUserInfo } from "../interfaces/IUserInfoResponse";
 
 export function AwesomeCVResumeTemplate({
-    resume,
+    userInfo,
 }: {
-    resume: IResumeDocument;
+    userInfo: IUserInfo;
 }) {
     return (
         <html>
@@ -34,27 +34,33 @@ export function AwesomeCVResumeTemplate({
 
           .header {
             margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
           }
 
           .name {
-            font-size: 30px;
+            font-size: 40px;
             font-weight: 700;
             line-height: 1.1;
-            color: #111827;
+            color: black;
             margin: 0 0 4px 0;
             letter-spacing: 0.2px;
           }
 
           .headline {
-            font-size: 14px;
-            color: #4b5563;
-            margin: 0 0 8px 0;
-            font-weight: 500;
+            color: #bf2d22;
+          }
+
+          .address {
+            font-style: italic;
+            font-size: 11px;
+            color: #636363;
           }
 
           .contact {
-            font-size: 10.5px;
-            color: #4b5563;
+            font-size: 11px;
             line-height: 1.5;
           }
 
@@ -64,20 +70,23 @@ export function AwesomeCVResumeTemplate({
           }
 
           .section-title {
-            font-size: 12px;
+            font-size: 20px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.2px;
-            color: #111827;
+            color: #bf2d22;
             margin: 0 0 10px 0;
             padding-bottom: 4px;
-            border-bottom: 1.5px solid #d1d5db;
-          }
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
 
-          .summary {
-            color: #374151;
-            margin: 0;
-          }
+        .section-divider {
+            flex: 1;
+            border-bottom: 1.5px solid black;
+        }
 
           .entry {
             margin-bottom: 14px;
@@ -94,22 +103,22 @@ export function AwesomeCVResumeTemplate({
           }
 
           .entry-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
-            color: #111827;
+            color: black;
             margin: 0;
           }
 
           .entry-date {
             font-size: 10.5px;
-            color: #4b5563;
+            color: #bf2d22;
             white-space: nowrap;
             text-align: right;
             margin-top: 1px;
           }
 
           .entry-subtitle {
-            font-size: 11px;
+            font-size: 10px;
             color: #4b5563;
             margin: 0 0 5px 0;
             font-weight: 500;
@@ -132,8 +141,8 @@ export function AwesomeCVResumeTemplate({
             color: #374151;
           }
 
-          .education-details,
-          .project-subtitle {
+          .education-details
+           {
             color: #4b5563;
             margin-top: 2px;
           }
@@ -151,47 +160,49 @@ export function AwesomeCVResumeTemplate({
             <body>
                 <div className="page">
                     <header className="header">
-                        <h1 className="name">{resume.contact.name}</h1>
+                        <h1 className="name">{userInfo.name}</h1>
 
-                        {resume.contact.headline && (
-                            <div className="headline">{resume.contact.headline}</div>
+                        {(userInfo.current_company || userInfo.current_position) && (
+                            <div className="headline">
+                                {[userInfo.current_position, userInfo.current_company]
+                                    .filter(Boolean)
+                                    .join(" · ")
+                                    .toUpperCase()}
+                            </div>
                         )}
 
+                        {userInfo.current_address && <div className="address">{userInfo.current_address}</div>}
+
                         <div className="contact">
-                            {[resume.contact.address, resume.contact.phone, resume.contact.email]
+                            {[userInfo.phone_number, userInfo.email, userInfo.github_url, userInfo.linkedin_url]
                                 .filter(Boolean)
                                 .join(" | ")}
                         </div>
                     </header>
 
-                    {resume.summary && (
+                    {userInfo.experiences.length > 0 && (
                         <section className="section">
-                            <div className="section-title">Summary</div>
-                            <p className="summary">{resume.summary}</p>
-                        </section>
-                    )}
 
-                    {resume.experience.length > 0 && (
-                        <section className="section">
-                            <div className="section-title">Work Experience</div>
+                            <div className="section-title">
+                                Work Experience
+                                <div className="section-divider" />
+                            </div>
 
-                            {resume.experience.map((exp, i) => (
+                            {userInfo.experiences.map((exp, i) => (
                                 <div className="entry" key={i}>
                                     <div className="entry-top">
                                         <div>
                                             <div className="entry-title">{exp.company}</div>
-                                            <div className="entry-subtitle">{exp.title}</div>
+                                            <div className="entry-subtitle">{exp.job_title}</div>
                                         </div>
                                         <div className="entry-date">
-                                            {exp.startDate} - {exp.endDate}
+                                            {exp.date_start} - {exp.date_end ?? "Present"}
                                         </div>
                                     </div>
 
-                                    {exp.bullets.length > 0 && (
+                                    {exp.job_description.length > 0 && (
                                         <ul>
-                                            {exp.bullets.map((bullet, j) => (
-                                                <li key={j}>{bullet}</li>
-                                            ))}
+                                            <li>{exp.job_description}</li>
                                         </ul>
                                     )}
                                 </div>
@@ -199,26 +210,28 @@ export function AwesomeCVResumeTemplate({
                         </section>
                     )}
 
-                    {resume.projects.length > 0 && (
+                    {userInfo.projects.length > 0 && (
                         <section className="section">
-                            <div className="section-title">Projects</div>
+                            <div className="section-title">
+                                Projects
+                                <div className="section-divider" />
+                            </div>
 
-                            {resume.projects.map((project, i) => (
+                            {userInfo.projects.map((project, i) => (
                                 <div className="entry" key={i}>
                                     <div className="entry-top">
                                         <div>
                                             <div className="entry-title">{project.name}</div>
-                                            {project.subtitle && (
-                                                <div className="project-subtitle">{project.subtitle}</div>
-                                            )}
+                                            <div className="entry-subtitle">{project.languages_used?.join(" | ")}</div>
+                                        </div>
+                                        <div className="entry-date">
+                                            {project.date_start} - {project.date_end ?? "Present"}
                                         </div>
                                     </div>
 
-                                    {project.bullets.length > 0 && (
+                                    {project.description.length > 0 && (
                                         <ul>
-                                            {project.bullets.map((bullet, j) => (
-                                                <li key={j}>{bullet}</li>
-                                            ))}
+                                            <li>{project.description}</li>
                                         </ul>
                                     )}
                                 </div>
@@ -226,11 +239,14 @@ export function AwesomeCVResumeTemplate({
                         </section>
                     )}
 
-                    {resume.education.length > 0 && (
+                    {userInfo.education.length > 0 && (
                         <section className="section">
-                            <div className="section-title">Education</div>
+                            <div className="section-title">
+                                Education
+                                <div className="section-divider" />
+                            </div>
 
-                            {resume.education.map((edu, i) => (
+                            {userInfo.education.map((edu, i) => (
                                 <div className="entry" key={i}>
                                     <div className="entry-top">
                                         <div>
@@ -238,26 +254,21 @@ export function AwesomeCVResumeTemplate({
                                             <div className="entry-subtitle">{edu.degree}</div>
                                         </div>
                                         <div className="entry-date">
-                                            {edu.startYear} - {edu.endYear}
+                                            {edu.year_start} - {edu.year_end ?? "Present"}
                                         </div>
                                     </div>
-
-                                    {edu.details.length > 0 && (
-                                        <ul>
-                                            {edu.details.map((detail, j) => (
-                                                <li key={j}>{detail}</li>
-                                            ))}
-                                        </ul>
-                                    )}
                                 </div>
                             ))}
                         </section>
                     )}
 
-                    {resume.skills.length > 0 && (
+                    {userInfo.skills.length > 0 && (
                         <section className="section">
-                            <div className="section-title">Skills</div>
-                            <div className="skills-list">{resume.skills.join(", ")}</div>
+                            <div className="section-title">
+                                Skills
+                                <div className="section-divider" />
+                            </div>
+                            <div className="skills-list">{userInfo.skills.join(", ")}</div>
                         </section>
                     )}
                 </div>
