@@ -27,6 +27,7 @@ export interface IUserInfo {
 /* ---------------- SKILLS ---------------- */
 
 export interface IUserSkill {
+  id: string;
   name: string;
   // use to sort skills by proficiency and experience
   proficiency: number | null;
@@ -36,6 +37,7 @@ export interface IUserSkill {
 /* ---------------- EXPERIENCE ---------------- */
 
 export interface IUserExperience {
+  id: string;
   company: string;
   job_title: string;
   date_start: string;
@@ -46,6 +48,7 @@ export interface IUserExperience {
 /* ---------------- PROJECTS ---------------- */
 
 export interface IUserProject {
+  id: string;
   name: string;
   date_start: string;
   date_end: string;
@@ -60,6 +63,7 @@ export interface IUserProject {
 /* ---------------- EDUCATION ---------------- */
 
 export interface IUserEducation {
+  id: string;
   degree: string;
   majors: string[];
   minors: string[];
@@ -72,6 +76,7 @@ export interface IUserEducation {
 }
 
 export interface IUserCourse {
+  id: string;
   name: string;
   // sort courses by grade
   grade: string | null;

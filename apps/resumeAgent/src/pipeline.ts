@@ -2,6 +2,11 @@ import getUserData from "./utils/getUserData";
 import { renderResumeHtml } from "./utils/renderResumeHtml";
 import { renderResumePdf } from "./utils/renderResumePdf";
 import { uploadResumeToSupabase } from "./utils/uploadResumeToSupabase";
+import getOpenAIClient from "./utils/getOpenAIClient";
+import { IUserInfo } from "./interfaces/IUserInfoResponse";
+import { enhanceResumeUserInfoAgent } from "./agents/enhanceResumeUserInfoAgent";
+
+const openAIClient = getOpenAIClient();
 
 function makeSafePrefix(name: string): string {
   const cleaned = name
@@ -13,23 +18,11 @@ function makeSafePrefix(name: string): string {
   return cleaned || "resume";
 }
 
-export async function runPipeline({
-  userId,
-  templateId,
-}: {
-  userId: string;
-  templateId?: string | undefined;
-}): Promise<{
-  success: true;
-  resumeUrl: string;
-}> {
-  // fetch user info
-  const userInfo = await getUserData(userId);
-
-  if (!userInfo) {
-    throw new Error("Error fetching user info");
-  }
-
+async function generateResumeFromUserInfoAndTemplate(
+  userId: string,
+  userInfo: IUserInfo,
+  templateId?: string | undefined,
+) {
   //   render the resume as HTML
   const html = renderResumeHtml(userInfo, templateId);
 
@@ -45,6 +38,48 @@ export async function runPipeline({
     contentType: "application/pdf",
   });
 
+  return resumeUrl;
+}
+
+export async function runGeneratePipeline({
+  userId,
+  templateId,
+  educationIds,
+  courseIds,
+  experienceIds,
+  projectIds,
+  skillIds,
+}: {
+  userId: string;
+  templateId?: string | undefined;
+  educationIds?: string[] | undefined;
+  courseIds?: string[] | undefined;
+  experienceIds?: string[] | undefined;
+  projectIds?: string[] | undefined;
+  skillIds?: string[] | undefined;
+}): Promise<{
+  success: true;
+  resumeUrl: string;
+}> {
+  // fetch user info
+  const userInfo = await getUserData(
+    userId,
+    educationIds,
+    courseIds,
+    experienceIds,
+    projectIds,
+    skillIds,
+  );
+  if (!userInfo) {
+    throw new Error("Error fetching user info");
+  }
+
+  const resumeUrl = await generateResumeFromUserInfoAndTemplate(
+    userId,
+    userInfo,
+    templateId,
+  );
+
   if (!resumeUrl) {
     throw new Error("Failed to upload generated resume");
   }
@@ -55,14 +90,41 @@ export async function runPipeline({
   };
 }
 
-export async function runEnhancementPipeline({
+export async function runGenerateWithAiPipeline({
   userId,
-  resumeUrl,
-  feedback,
+  templateId,
+  targetJobs,
 }: {
   userId: string;
-  resumeUrl: string;
-  feedback?: string | undefined;
+  templateId?: string | undefined;
+  targetJobs?: string[] | undefined;
 }) {
-  throw new Error("Enhancement pipeline not implemented yet");
+  // fetch ALL user info
+  const userInfo = await getUserData(userId);
+  if (!userInfo) {
+    throw new Error("Error fetching user info");
+  }
+
+  // run the enhancement agent
+  const resumeEnhancedUserInfo: IUserInfo = await enhanceResumeUserInfoAgent(
+    openAIClient,
+    userInfo,
+    targetJobs,
+  );
+
+  // generate the resume
+  const resumeUrl = await generateResumeFromUserInfoAndTemplate(
+    userId,
+    resumeEnhancedUserInfo,
+    templateId,
+  );
+
+  if (!resumeUrl) {
+    throw new Error("Failed to upload generated resume");
+  }
+
+  return {
+    success: true,
+    resumeUrl,
+  };
 }

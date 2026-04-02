@@ -1,16 +1,25 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { runPipeline, runEnhancementPipeline } from "./pipeline";
+import { runGeneratePipeline, runGenerateWithAiPipeline } from "./pipeline";
 import { z } from "zod";
 
 const generateResumeSchema = z.object({
   userId: z.string(),
   templateId: z.string().optional(),
+  // to include in the resume - if not provided, include all
+  educationIds: z.array(z.string()).optional(),
+  experienceIds: z.array(z.string()).optional(),
+  courseIds: z.array(z.string()).optional(),
+  projectIds: z.array(z.string()).optional(),
+  skillIds: z.array(z.string()).optional(),
 });
 
-const enhanceResumeSchema = z.object({
+// enhance the user info intelligently and output a template
+const generateResumeWithAiSchema = z.object({
   userId: z.string(),
-  resumeUrl: z.string(),
-  feedback: z.string().optional(),
+  templateId: z.string().optional(),
+  // list of job types the user is trying to land
+  targetJobs: z.array(z.string()).optional(),
+  // LLM determines intelligently which items to include/exclude
 });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -31,7 +40,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     if (route === "/generate") {
       const input = generateResumeSchema.parse(body);
-      const result = await runPipeline(input);
+      const result = await runGeneratePipeline(input);
 
       return {
         statusCode: 200,
@@ -43,9 +52,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       };
     }
 
-    if (route === "/enhance") {
-      const input = enhanceResumeSchema.parse(body);
-      const result = await runEnhancementPipeline(input);
+    if (route === "/generateAi") {
+      const input = generateResumeWithAiSchema.parse(body);
+      const result = await runGenerateWithAiPipeline(input);
 
       return {
         statusCode: 200,

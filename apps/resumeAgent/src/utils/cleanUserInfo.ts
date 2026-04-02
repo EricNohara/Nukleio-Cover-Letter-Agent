@@ -167,9 +167,22 @@ function gradeRank(grade: string | null | undefined): number {
   return ranks[normalized] ?? -1;
 }
 
+function filterByIds<T extends { id: string }>(
+  items: T[],
+  ids?: string[],
+): T[] {
+  if (!ids) return items;
+  const idSet = new Set(ids);
+  return items.filter((item) => idSet.has(item.id));
+}
+
 export function cleanUserInfo(
   userInfo: IUserInfo,
-  keepCount: number = 3,
+  educationIds?: string[] | undefined,
+  courseIds?: string[] | undefined,
+  experienceIds?: string[] | undefined,
+  projectIds?: string[] | undefined,
+  skillIds?: string[] | undefined,
 ): IUserInfo {
   return {
     email: cleanRequiredString(userInfo.email),
@@ -188,8 +201,9 @@ export function cleanUserInfo(
     instagram_url: cleanString(userInfo.instagram_url),
     x_url: cleanString(userInfo.x_url),
 
-    skills: userInfo.skills
+    skills: filterByIds(userInfo.skills, skillIds)
       .map((skill) => ({
+        id: skill.id,
         name: cleanRequiredString(skill.name),
         proficiency: skill.proficiency,
         years_of_experience: skill.years_of_experience,
@@ -211,8 +225,9 @@ export function cleanUserInfo(
         return a.name.localeCompare(b.name);
       }),
 
-    experiences: userInfo.experiences
+    experiences: filterByIds(userInfo.experiences, experienceIds)
       .map((experience) => ({
+        id: experience.id,
         company: cleanRequiredString(experience.company),
         job_title: cleanRequiredString(experience.job_title),
         date_start: formatRequiredReadableDate(experience.date_start),
@@ -235,14 +250,14 @@ export function cleanUserInfo(
           b._raw_date_start,
         ),
       )
-      .map(({ _raw_date_start, _raw_date_end, ...experience }) => experience)
-      .slice(0, keepCount),
+      .map(({ _raw_date_start, _raw_date_end, ...experience }) => experience),
 
-    projects: userInfo.projects
+    projects: filterByIds(userInfo.projects, projectIds)
       .map((project) => {
         const rawDateEnd = cleanRequiredString(project.date_end);
 
         return {
+          id: project.id,
           name: cleanRequiredString(project.name),
           date_start: formatRequiredReadableDate(project.date_start),
           date_end: formatRequiredReadableDate(project.date_end),
@@ -267,11 +282,11 @@ export function cleanUserInfo(
           b._raw_date_start,
         ),
       )
-      .map(({ _raw_date_start, _raw_date_end, ...project }) => project)
-      .slice(0, keepCount),
+      .map(({ _raw_date_start, _raw_date_end, ...project }) => project),
 
-    education: userInfo.education
+    education: filterByIds(userInfo.education, educationIds)
       .map((education) => ({
+        id: education.id,
         degree: cleanRequiredString(education.degree),
         majors: education.majors.map((major) => major.trim()).filter(Boolean),
         minors: education.minors.map((minor) => minor.trim()).filter(Boolean),
@@ -280,8 +295,9 @@ export function cleanUserInfo(
         awards: education.awards.map((award) => award.trim()).filter(Boolean),
         year_start: education.year_start,
         year_end: education.year_end,
-        courses: education.courses
+        courses: filterByIds(education.courses, courseIds)
           .map((course) => ({
+            id: course.id,
             name: cleanRequiredString(course.name),
             grade: cleanString(course.grade),
             description: cleanString(course.description),
@@ -311,7 +327,6 @@ export function cleanUserInfo(
         if (secondary !== 0) return secondary;
 
         return a.institution.localeCompare(b.institution);
-      })
-      .slice(0, keepCount),
+      }),
   };
 }

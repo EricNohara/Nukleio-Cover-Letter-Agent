@@ -8,6 +8,11 @@ const NUKLEIO_BASE_URL = process.env.NUKLEIO_BASE_URL!;
 
 export default async function getUserData(
   userId: string,
+  educationIds?: string[] | undefined,
+  courseIds?: string[] | undefined,
+  experienceIds?: string[] | undefined,
+  projectIds?: string[] | undefined,
+  skillIds?: string[] | undefined,
 ): Promise<IUserInfo | null> {
   const res = await fetch(NUKLEIO_BASE_URL, {
     method: "GET",
@@ -31,5 +36,12 @@ export default async function getUserData(
 
   const u = raw.userInfo;
 
-  return cleanUserInfo(u);
+  return cleanUserInfo(
+    u,
+    educationIds,
+    courseIds,
+    experienceIds,
+    projectIds,
+    skillIds,
+  );
 }
