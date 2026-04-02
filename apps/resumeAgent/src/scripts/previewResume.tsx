@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { IUserInfo } from "../interfaces/IUserInfoResponse";
 import { cleanUserInfo } from "../utils/cleanUserInfo";
 import { AwesomeCVResumeTemplate } from "../templates/AwesomeCVResumeTemplate";
+import { DefaultResumeTemplate } from "../templates/DefaultResumeTemplate";
 
 //  mock data
 export const mockUserInfo: IUserInfo = {
@@ -602,7 +603,7 @@ const userInfo = cleanUserInfo(mockUserInfo, educationIds, courseIds, experience
 // render HTML
 const html =
     "<!DOCTYPE html>" +
-    renderToStaticMarkup(<AwesomeCVResumeTemplate userInfo={userInfo} />);
+    renderToStaticMarkup(<DefaultResumeTemplate userInfo={userInfo} />);
 
 // write file
 const filePath = path.join(process.cwd(), "preview.html");
