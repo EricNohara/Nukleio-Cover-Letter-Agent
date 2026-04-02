@@ -16,6 +16,13 @@ export function DefaultResumeTemplate({
             margin: 0.5in 0.5in 0.5in 0.5in;
           }
 
+        @font-face {
+            font-family: "Times New Roman Custom";
+            src: url("https://fonts.cdnfonts.com/s/14645/TimesNewRoman.woff") format("woff");
+            font-weight: normal;
+            font-style: normal;
+        }
+
           * {
             box-sizing: border-box;
           }
@@ -23,7 +30,7 @@ export function DefaultResumeTemplate({
           body {
             margin: 0;
             color: black;
-            font-family: "Times New Roman", Times, serif;
+            font-family: "Times New Roman", Times, Georgia, serif;
             font-size: 11px;
             line-height: 1.25;
           }
