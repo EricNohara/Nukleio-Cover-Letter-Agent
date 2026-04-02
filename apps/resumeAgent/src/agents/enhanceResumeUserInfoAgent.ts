@@ -43,30 +43,50 @@ type LLMInput = {
 };
 
 const llmOutputSchema = z.object({
-  skills: z.array(z.string()),
-  experiences: z.array(
-    z.object({
-      company: z.string(),
-      job_title: z.string(),
-      job_description: z.string(),
-    }),
-  ),
-  projects: z.array(
-    z.object({
-      name: z.string(),
-      description: z.string(),
-    }),
-  ),
-  education: z.array(
-    z.object({
-      degree: z.string(),
-      institution: z.string(),
-      courses: z.array(z.string()),
-    }),
-  ),
+  skills: z.array(z.string()).max(DEFAULT_LIMITS.maxSkills),
+  experiences: z
+    .array(
+      z.object({
+        company: z.string(),
+        job_title: z.string(),
+        job_description: z.string(),
+      }),
+    )
+    .max(DEFAULT_LIMITS.maxExperiences),
+  projects: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+      }),
+    )
+    .max(DEFAULT_LIMITS.maxProjects),
+  education: z
+    .array(
+      z.object({
+        degree: z.string(),
+        institution: z.string(),
+        courses: z.array(z.string()).max(DEFAULT_LIMITS.maxCoursesPerEducation),
+      }),
+    )
+    .max(DEFAULT_LIMITS.maxEducations),
 });
 
 type LLMOutput = z.infer<typeof llmOutputSchema>;
+
+function enforceHardLimits(data: LLMOutput): LLMOutput {
+  return {
+    skills: data.skills.slice(0, DEFAULT_LIMITS.maxSkills),
+    experiences: data.experiences.slice(0, DEFAULT_LIMITS.maxExperiences),
+    projects: data.projects.slice(0, DEFAULT_LIMITS.maxProjects),
+    education: data.education
+      .slice(0, DEFAULT_LIMITS.maxEducations)
+      .map((edu) => ({
+        ...edu,
+        courses: edu.courses.slice(0, DEFAULT_LIMITS.maxCoursesPerEducation),
+      })),
+  };
+}
 
 function toLLMInput(userInfo: IUserInfo): LLMInput {
   return {
@@ -100,20 +120,7 @@ function toLLMInput(userInfo: IUserInfo): LLMInput {
   };
 }
 
-function buildPrompt(
-  userInfo: LLMInput,
-  targetJobs?: string[],
-  limits: ResumeSelectionLimits = DEFAULT_LIMITS,
-): string {
-  const resolved = {
-    maxSkills: limits.maxSkills ?? DEFAULT_LIMITS.maxSkills,
-    maxExperiences: limits.maxExperiences ?? DEFAULT_LIMITS.maxExperiences,
-    maxProjects: limits.maxProjects ?? DEFAULT_LIMITS.maxProjects,
-    maxEducations: limits.maxEducations ?? DEFAULT_LIMITS.maxEducations,
-    maxCoursesPerEducation:
-      limits.maxCoursesPerEducation ?? DEFAULT_LIMITS.maxCoursesPerEducation,
-  };
-
+function buildPrompt(userInfo: LLMInput, targetJobs?: string[]): string {
   const hasTargets = Array.isArray(targetJobs) && targetJobs.length > 0;
 
   return `
@@ -133,11 +140,11 @@ IMPORTANT HARD RULES:
 6. REMOVE weaker or less relevant items.
 
 SELECTION LIMITS:
-- skills <= ${resolved.maxSkills}
-- experiences <= ${resolved.maxExperiences}
-- projects <= ${resolved.maxProjects}
-- education entries <= ${resolved.maxEducations}
-- courses per education entry <= ${resolved.maxCoursesPerEducation}
+- skills <= ${DEFAULT_LIMITS.maxSkills}
+- experiences <= ${DEFAULT_LIMITS.maxExperiences}
+- projects <= ${DEFAULT_LIMITS.maxProjects}
+- education entries <= ${DEFAULT_LIMITS.maxEducations}
+- courses per education entry <= ${DEFAULT_LIMITS.maxCoursesPerEducation}
 
 DESCRIPTION REWRITE STYLE:
 - sentence count <= 3 (less is better)
@@ -315,10 +322,9 @@ export async function enhanceResumeUserInfoAgent(
   openAIClient: OpenAI,
   userInfo: IUserInfo,
   targetJobs?: string[],
-  limits: ResumeSelectionLimits = DEFAULT_LIMITS,
 ): Promise<IUserInfo> {
   const llmInput = toLLMInput(userInfo);
-  const prompt = buildPrompt(llmInput, targetJobs, limits);
+  const prompt = buildPrompt(llmInput, targetJobs);
 
   const response = await openAIClient.responses.create({
     model: "gpt-5.1",
@@ -350,6 +356,7 @@ export async function enhanceResumeUserInfoAgent(
               items: {
                 type: "string",
               },
+              maxItems: DEFAULT_LIMITS.maxSkills,
             },
             experiences: {
               type: "array",
@@ -363,6 +370,7 @@ export async function enhanceResumeUserInfoAgent(
                 },
                 required: ["company", "job_title", "job_description"],
               },
+              maxItems: DEFAULT_LIMITS.maxExperiences,
             },
             projects: {
               type: "array",
@@ -375,6 +383,7 @@ export async function enhanceResumeUserInfoAgent(
                 },
                 required: ["name", "description"],
               },
+              maxItems: DEFAULT_LIMITS.maxProjects,
             },
             education: {
               type: "array",
@@ -389,10 +398,12 @@ export async function enhanceResumeUserInfoAgent(
                     items: {
                       type: "string",
                     },
+                    maxItems: DEFAULT_LIMITS.maxCoursesPerEducation,
                   },
                 },
                 required: ["degree", "institution", "courses"],
               },
+              maxItems: DEFAULT_LIMITS.maxEducations,
             },
           },
           required: ["skills", "experiences", "projects", "education"],
@@ -402,6 +413,7 @@ export async function enhanceResumeUserInfoAgent(
   });
 
   const parsed = llmOutputSchema.parse(JSON.parse(response.output_text));
+  const constrained = enforceHardLimits(parsed);
 
-  return mergeEnhancedContent(userInfo, parsed);
+  return mergeEnhancedContent(userInfo, constrained);
 }
