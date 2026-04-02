@@ -19,9 +19,7 @@ const DEFAULT_LIMITS: Required<ResumeSelectionLimits> = {
 };
 
 type LLMInput = {
-  skills: Array<{
-    name: string;
-  }>;
+  skills: Array<string>;
   experiences: Array<{
     company: string;
     job_title: string;
@@ -45,11 +43,7 @@ type LLMInput = {
 };
 
 const llmOutputSchema = z.object({
-  skills: z.array(
-    z.object({
-      name: z.string(),
-    }),
-  ),
+  skills: z.array(z.string()),
   experiences: z.array(
     z.object({
       company: z.string(),
@@ -67,11 +61,7 @@ const llmOutputSchema = z.object({
     z.object({
       degree: z.string(),
       institution: z.string(),
-      courses: z.array(
-        z.object({
-          name: z.string(),
-        }),
-      ),
+      courses: z.array(z.string()),
     }),
   ),
 });
@@ -80,9 +70,7 @@ type LLMOutput = z.infer<typeof llmOutputSchema>;
 
 function toLLMInput(userInfo: IUserInfo): LLMInput {
   return {
-    skills: userInfo.skills.map((skill) => ({
-      name: skill.name,
-    })),
+    skills: userInfo.skills.map((skill) => skill.name),
     experiences: userInfo.experiences.map((experience) => ({
       company: experience.company,
       job_title: experience.job_title,
@@ -169,11 +157,11 @@ function reattachSkills(
 ): IUserInfo["skills"] {
   return selected.map((skill) => {
     const match = original.find(
-      (originalSkill) => originalSkill.name === skill.name,
+      (originalSkill) => originalSkill.name === skill,
     );
 
     if (!match) {
-      throw new Error(`Failed to reattach skill id for "${skill.name}"`);
+      throw new Error(`Failed to reattach skill id for "${skill}"`);
     }
 
     return {
@@ -260,12 +248,12 @@ function reattachEducation(
 
     const courses = education.courses.map((course) => {
       const courseMatch = educationMatch.courses.find(
-        (originalCourse) => originalCourse.name === course.name,
+        (originalCourse) => originalCourse.name === course,
       );
 
       if (!courseMatch) {
         throw new Error(
-          `Failed to reattach course id for "${educationMatch.institution} - ${course.name}"`,
+          `Failed to reattach course id for "${educationMatch.institution} - ${course}"`,
         );
       }
 
@@ -360,12 +348,7 @@ export async function enhanceResumeUserInfoAgent(
             skills: {
               type: "array",
               items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  name: { type: "string" },
-                },
-                required: ["name"],
+                type: "string",
               },
             },
             experiences: {
@@ -404,12 +387,7 @@ export async function enhanceResumeUserInfoAgent(
                   courses: {
                     type: "array",
                     items: {
-                      type: "object",
-                      additionalProperties: false,
-                      properties: {
-                        name: { type: "string" },
-                      },
-                      required: ["name"],
+                      type: "string",
                     },
                   },
                 },
