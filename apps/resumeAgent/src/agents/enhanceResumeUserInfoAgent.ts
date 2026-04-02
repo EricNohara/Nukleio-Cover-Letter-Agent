@@ -11,7 +11,7 @@ type ResumeSelectionLimits = {
 };
 
 const DEFAULT_LIMITS: Required<ResumeSelectionLimits> = {
-  maxSkills: 20,
+  maxSkills: 16,
   maxExperiences: 3,
   maxProjects: 3,
   maxEducations: 2,
@@ -140,7 +140,7 @@ SELECTION LIMITS:
 - courses per education entry <= ${resolved.maxCoursesPerEducation}
 
 DESCRIPTION REWRITE STYLE:
-- sentence count <= 3
+- sentence count <= 3 (less is better)
 - sentence length <= 130 characters
 - concise, technical, no first person
 
