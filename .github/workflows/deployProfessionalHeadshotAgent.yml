@@ -36,9 +36,16 @@ jobs:
           mkdir -p apps/professionalHeadshotAgent/package
           cp -r apps/professionalHeadshotAgent/dist/* apps/professionalHeadshotAgent/package/
           cp apps/professionalHeadshotAgent/package.json apps/professionalHeadshotAgent/package/
-          cp -r node_modules apps/professionalHeadshotAgent/package/
           cd apps/professionalHeadshotAgent/package
+          npm install --omit=dev --no-package-lock
           zip -r ../function.zip .
+
+      - name: Inspect deployment artifact
+        run: |
+          ls -lh apps/professionalHeadshotAgent/function.zip
+          du -sh apps/professionalHeadshotAgent/package
+          du -sh apps/professionalHeadshotAgent/package/node_modules
+          du -sh apps/professionalHeadshotAgent/package/dist || true
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
