@@ -1,0 +1,61 @@
+name: Deploy Cover Letter Agent
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "apps/coverLetterAgent/**"
+      - ".github/workflows/deployCoverLetterAgent.yml"
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build cover letter agent
+        run: npm run build --workspace=nukleio-cover-letter-agent
+
+      - name: Prepare deployment package
+        run: |
+          rm -rf apps/coverLetterAgent/package apps/coverLetterAgent/function.zip
+          mkdir -p apps/coverLetterAgent/package
+          cp -r apps/coverLetterAgent/dist/* apps/coverLetterAgent/package/
+          cp apps/coverLetterAgent/package.json apps/coverLetterAgent/package/
+          cd apps/coverLetterAgent/package
+          npm install --omit=dev --no-package-lock
+          zip -r ../function.zip .
+
+      - name: Inspect deployment artifact
+        run: |
+          ls -lh apps/coverLetterAgent/function.zip
+          du -sh apps/coverLetterAgent/package
+          du -sh apps/coverLetterAgent/package/node_modules
+          du -sh apps/coverLetterAgent/package/dist || true
+
+      - name: Deploy to AWS Lambda
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: ${{ github.ref_name == 'main' && 'Nukleio-Cover-Letter-Agent' || 'Nukleio-Cover-Letter-Agent-Dev' }}
+          zip_file: apps/coverLetterAgent/function.zip
+          runtime: nodejs20.x
+          handler: index.handler
+          memory_size: 1536
+          timeout: 900

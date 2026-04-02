@@ -1,0 +1,61 @@
+name: Deploy Resume Agent
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - "apps/resumeAgent/**"
+      - ".github/workflows/deployResumeAgent.yml"
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build resume agent
+        run: npm run build --workspace=nukleio-resume-agent
+
+      - name: Prepare deployment package
+        run: |
+          rm -rf apps/resumeAgent/package apps/resumeAgent/function.zip
+          mkdir -p apps/resumeAgent/package
+          cp -r apps/resumeAgent/dist/* apps/resumeAgent/package/
+          cp apps/resumeAgent/package.json apps/resumeAgent/package/
+          cd apps/resumeAgent/package
+          npm install --omit=dev --no-package-lock
+          zip -r ../function.zip .
+
+      - name: Inspect deployment artifact
+        run: |
+          ls -lh apps/resumeAgent/function.zip
+          du -sh apps/resumeAgent/package
+          du -sh apps/resumeAgent/package/node_modules
+          du -sh apps/resumeAgent/package/dist || true
+
+      - name: Deploy to AWS Lambda
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: ${{ github.ref_name == 'main' && 'Nukleio-Resume-Agent' || 'Nukleio-Resume-Agent-Dev' }}
+          zip_file: apps/resumeAgent/function.zip
+          runtime: nodejs20.x
+          handler: index.handler
+          memory_size: 1536
+          timeout: 900
