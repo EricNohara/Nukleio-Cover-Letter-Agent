@@ -21,39 +21,24 @@ const DEFAULT_LIMITS: Required<ResumeSelectionLimits> = {
 type LLMInput = {
   skills: Array<{
     name: string;
-    proficiency: number | null;
-    years_of_experience: number | null;
   }>;
   experiences: Array<{
     company: string;
     job_title: string;
-    date_start: string;
-    date_end: string | null;
     job_description: string;
   }>;
   projects: Array<{
     name: string;
-    date_start: string;
-    date_end: string;
-    languages_used: string[] | null;
-    frameworks_used: string[] | null;
-    technologies_used: string[] | null;
+    tech: string[];
     description: string;
-    github_url: string | null;
-    demo_url: string | null;
   }>;
   education: Array<{
     degree: string;
     majors: string[];
     minors: string[];
-    gpa: string | null;
     institution: string;
-    awards: string[];
-    year_start: number;
-    year_end: number | null;
     courses: Array<{
       name: string;
-      grade: string | null;
       description: string | null;
     }>;
   }>;
@@ -63,47 +48,28 @@ const llmOutputSchema = z.object({
   skills: z.array(
     z.object({
       name: z.string(),
-      proficiency: z.number().nullable(),
-      years_of_experience: z.number().nullable(),
     }),
   ),
   experiences: z.array(
     z.object({
       company: z.string(),
       job_title: z.string(),
-      date_start: z.string(),
-      date_end: z.string().nullable(),
       job_description: z.string(),
     }),
   ),
   projects: z.array(
     z.object({
       name: z.string(),
-      date_start: z.string(),
-      date_end: z.string(),
-      languages_used: z.array(z.string()).nullable(),
-      frameworks_used: z.array(z.string()).nullable(),
-      technologies_used: z.array(z.string()).nullable(),
       description: z.string(),
-      github_url: z.string().nullable(),
-      demo_url: z.string().nullable(),
     }),
   ),
   education: z.array(
     z.object({
       degree: z.string(),
-      majors: z.array(z.string()),
-      minors: z.array(z.string()),
-      gpa: z.string().nullable(),
       institution: z.string(),
-      awards: z.array(z.string()),
-      year_start: z.number(),
-      year_end: z.number().nullable(),
       courses: z.array(
         z.object({
           name: z.string(),
-          grade: z.string().nullable(),
-          description: z.string().nullable(),
         }),
       ),
     }),
@@ -116,39 +82,30 @@ function toLLMInput(userInfo: IUserInfo): LLMInput {
   return {
     skills: userInfo.skills.map((skill) => ({
       name: skill.name,
-      proficiency: skill.proficiency,
-      years_of_experience: skill.years_of_experience,
     })),
     experiences: userInfo.experiences.map((experience) => ({
       company: experience.company,
       job_title: experience.job_title,
-      date_start: experience.date_start,
-      date_end: experience.date_end,
       job_description: experience.job_description,
     })),
     projects: userInfo.projects.map((project) => ({
       name: project.name,
-      date_start: project.date_start,
-      date_end: project.date_end,
-      languages_used: project.languages_used,
-      frameworks_used: project.frameworks_used,
-      technologies_used: project.technologies_used,
+      tech: Array.from(
+        new Set([
+          ...(project.languages_used ?? []),
+          ...(project.frameworks_used ?? []),
+          ...(project.technologies_used ?? []),
+        ]),
+      ),
       description: project.description,
-      github_url: project.github_url,
-      demo_url: project.demo_url,
     })),
     education: userInfo.education.map((education) => ({
       degree: education.degree,
       majors: education.majors,
       minors: education.minors,
-      gpa: education.gpa,
       institution: education.institution,
-      awards: education.awards,
-      year_start: education.year_start,
-      year_end: education.year_end,
       courses: education.courses.map((course) => ({
         name: course.name,
-        grade: course.grade,
         description: course.description,
       })),
     })),
@@ -172,44 +129,37 @@ function buildPrompt(
   const hasTargets = Array.isArray(targetJobs) && targetJobs.length > 0;
 
   return `
-Select the strongest resume content from the user's FULL profile and lightly improve ONLY description fields for resume quality.
+Optimize the user's data for a resume. Edit ONLY experience and project description fields.
 Return JSON only.
 
 IMPORTANT HARD RULES:
-1. This is for a resume, so concise is better.
-2. Keep only the strongest items in each category.
+1. Be concise.
+2. Keep the strongest items in each category.
 3. Prioritize items that are:
-   - technically strong and impressive
-   - relevant to software engineering / technical roles
-   ${hasTargets && "- aligned to the provided target jobs"}
-4. ONLY description fields may be rewritten:
+   - technically strong and relevant to software engineering
+   ${hasTargets ? "- aligned to the provided target jobs" : ""}
+4. ONLY fields that can be rewritten:
    - experiences[].job_description
    - projects[].description
-   - education[].courses[].description
-5. Do NOT rewrite non-description fields.
-6. Do NOT invent facts, metrics, technologies, awards, dates, roles, or accomplishments.
-7. Do NOT add new items or fields.
-8. Remove weaker or less relevant items entirely instead of keeping everything.
-9. Preserve factual meaning exactly.
+5. Do NOT change any fields other than those 2.
+6. REMOVE weaker or less relevant items.
 
-SELECTION LIMITS - KEEP AT MOST:
-- skills: ${resolved.maxSkills}
-- experiences: ${resolved.maxExperiences}
-- projects: ${resolved.maxProjects}
-- education entries: ${resolved.maxEducations}
-- courses per education entry: ${resolved.maxCoursesPerEducation}
+SELECTION LIMITS:
+- skills <= ${resolved.maxSkills}
+- experiences <= ${resolved.maxExperiences}
+- projects <= ${resolved.maxProjects}
+- education entries <= ${resolved.maxEducations}
+- courses per education entry <= ${resolved.maxCoursesPerEducation}
 
 DESCRIPTION REWRITE STYLE:
-- concise
-- technical
-- resume-oriented
-- action-oriented
-- no first person
+- sentence count <= 3
+- sentence length <= 130 characters
+- concise, technical, no first person
 
-${hasTargets && `TARGET JOBS:\n${JSON.stringify(targetJobs, null, 2)}`}
+${hasTargets ? `TARGET JOBS:\n${JSON.stringify(targetJobs)}` : ""}
 
 USER PROFILE DATA:
-${JSON.stringify(userInfo, null, 2)}
+${JSON.stringify(userInfo)}
 `;
 }
 
@@ -219,10 +169,7 @@ function reattachSkills(
 ): IUserInfo["skills"] {
   return selected.map((skill) => {
     const match = original.find(
-      (originalSkill) =>
-        originalSkill.name === skill.name &&
-        originalSkill.proficiency === skill.proficiency &&
-        originalSkill.years_of_experience === skill.years_of_experience,
+      (originalSkill) => originalSkill.name === skill.name,
     );
 
     if (!match) {
@@ -231,9 +178,9 @@ function reattachSkills(
 
     return {
       id: match.id,
-      name: skill.name,
-      proficiency: skill.proficiency,
-      years_of_experience: skill.years_of_experience,
+      name: match.name,
+      proficiency: match.proficiency,
+      years_of_experience: match.years_of_experience,
     };
   });
 }
@@ -246,9 +193,7 @@ function reattachExperiences(
     const match = original.find(
       (originalExperience) =>
         originalExperience.company === experience.company &&
-        originalExperience.job_title === experience.job_title &&
-        originalExperience.date_start === experience.date_start &&
-        originalExperience.date_end === experience.date_end,
+        originalExperience.job_title === experience.job_title,
     );
 
     if (!match) {
@@ -274,10 +219,7 @@ function reattachProjects(
 ): IUserInfo["projects"] {
   return selected.map((project) => {
     const match = original.find(
-      (originalProject) =>
-        originalProject.name === project.name &&
-        originalProject.date_start === project.date_start &&
-        originalProject.date_end === project.date_end,
+      (originalProject) => originalProject.name === project.name,
     );
 
     if (!match) {
@@ -307,9 +249,7 @@ function reattachEducation(
     const educationMatch = original.find(
       (originalEducation) =>
         originalEducation.institution === education.institution &&
-        originalEducation.degree === education.degree &&
-        originalEducation.year_start === education.year_start &&
-        originalEducation.year_end === education.year_end,
+        originalEducation.degree === education.degree,
     );
 
     if (!educationMatch) {
@@ -320,9 +260,7 @@ function reattachEducation(
 
     const courses = education.courses.map((course) => {
       const courseMatch = educationMatch.courses.find(
-        (originalCourse) =>
-          originalCourse.name === course.name &&
-          originalCourse.grade === course.grade,
+        (originalCourse) => originalCourse.name === course.name,
       );
 
       if (!courseMatch) {
@@ -335,7 +273,7 @@ function reattachEducation(
         id: courseMatch.id,
         name: courseMatch.name,
         grade: courseMatch.grade,
-        description: course.description,
+        description: courseMatch.description,
       };
     });
 
@@ -426,10 +364,8 @@ export async function enhanceResumeUserInfoAgent(
                 additionalProperties: false,
                 properties: {
                   name: { type: "string" },
-                  proficiency: { type: ["number", "null"] },
-                  years_of_experience: { type: ["number", "null"] },
                 },
-                required: ["name", "proficiency", "years_of_experience"],
+                required: ["name"],
               },
             },
             experiences: {
@@ -440,17 +376,9 @@ export async function enhanceResumeUserInfoAgent(
                 properties: {
                   company: { type: "string" },
                   job_title: { type: "string" },
-                  date_start: { type: "string" },
-                  date_end: { type: ["string", "null"] },
                   job_description: { type: "string" },
                 },
-                required: [
-                  "company",
-                  "job_title",
-                  "date_start",
-                  "date_end",
-                  "job_description",
-                ],
+                required: ["company", "job_title", "job_description"],
               },
             },
             projects: {
@@ -460,35 +388,9 @@ export async function enhanceResumeUserInfoAgent(
                 additionalProperties: false,
                 properties: {
                   name: { type: "string" },
-                  date_start: { type: "string" },
-                  date_end: { type: "string" },
-                  languages_used: {
-                    type: ["array", "null"],
-                    items: { type: "string" },
-                  },
-                  frameworks_used: {
-                    type: ["array", "null"],
-                    items: { type: "string" },
-                  },
-                  technologies_used: {
-                    type: ["array", "null"],
-                    items: { type: "string" },
-                  },
                   description: { type: "string" },
-                  github_url: { type: ["string", "null"] },
-                  demo_url: { type: ["string", "null"] },
                 },
-                required: [
-                  "name",
-                  "date_start",
-                  "date_end",
-                  "languages_used",
-                  "frameworks_used",
-                  "technologies_used",
-                  "description",
-                  "github_url",
-                  "demo_url",
-                ],
+                required: ["name", "description"],
               },
             },
             education: {
@@ -498,22 +400,7 @@ export async function enhanceResumeUserInfoAgent(
                 additionalProperties: false,
                 properties: {
                   degree: { type: "string" },
-                  majors: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
-                  minors: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
-                  gpa: { type: ["string", "null"] },
                   institution: { type: "string" },
-                  awards: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
-                  year_start: { type: "number" },
-                  year_end: { type: ["number", "null"] },
                   courses: {
                     type: "array",
                     items: {
@@ -521,24 +408,12 @@ export async function enhanceResumeUserInfoAgent(
                       additionalProperties: false,
                       properties: {
                         name: { type: "string" },
-                        grade: { type: ["string", "null"] },
-                        description: { type: ["string", "null"] },
                       },
-                      required: ["name", "grade", "description"],
+                      required: ["name"],
                     },
                   },
                 },
-                required: [
-                  "degree",
-                  "majors",
-                  "minors",
-                  "gpa",
-                  "institution",
-                  "awards",
-                  "year_start",
-                  "year_end",
-                  "courses",
-                ],
+                required: ["degree", "institution", "courses"],
               },
             },
           },
