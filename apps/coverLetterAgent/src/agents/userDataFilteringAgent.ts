@@ -44,40 +44,48 @@ type LLMInput = {
   }>;
 };
 
-const filteredUserContentSchema = z.object({
-  skills: z.array(z.string()).max(DEFAULT_LIMITS.maxSkills),
-  experiences: z
-    .array(
-      z.object({
-        company: z.string(),
-        job_title: z.string(),
-        job_description: z.string().max(75),
-      }),
-    )
-    .max(DEFAULT_LIMITS.maxExperiences),
-  projects: z
-    .array(
-      z.object({
-        name: z.string(),
-        tech: z.array(z.string()).nullable(),
-        description: z.string().max(75),
-      }),
-    )
-    .max(DEFAULT_LIMITS.maxProjects),
-  education: z
-    .array(
-      z.object({
-        degree: z.string(),
-        fields_of_study: z.array(z.string()).nullable(),
-        institution: z.string(),
-        courses: z
-          .array(z.string())
-          .max(DEFAULT_LIMITS.maxCoursesPerEducation)
-          .nullable(),
-      }),
-    )
-    .max(DEFAULT_LIMITS.maxEducations),
-});
+const filteredUserContentSchema = z
+  .object({
+    skills: z.array(z.string()).max(DEFAULT_LIMITS.maxSkills),
+    experiences: z
+      .array(
+        z
+          .object({
+            company: z.string(),
+            job_title: z.string(),
+            job_description: z.string().max(75),
+          })
+          .strict(),
+      )
+      .max(DEFAULT_LIMITS.maxExperiences),
+    projects: z
+      .array(
+        z
+          .object({
+            name: z.string(),
+            tech: z.array(z.string()).nullable(),
+            description: z.string().max(75),
+          })
+          .strict(),
+      )
+      .max(DEFAULT_LIMITS.maxProjects),
+    education: z
+      .array(
+        z
+          .object({
+            degree: z.string(),
+            fields_of_study: z.array(z.string()).nullable(),
+            institution: z.string(),
+            courses: z
+              .array(z.string())
+              .max(DEFAULT_LIMITS.maxCoursesPerEducation)
+              .nullable(),
+          })
+          .strict(),
+      )
+      .max(DEFAULT_LIMITS.maxEducations),
+  })
+  .strict();
 
 type FilteredUserContent = z.infer<typeof filteredUserContentSchema>;
 
@@ -91,16 +99,16 @@ function toLLMInput(userInfo: IUserInfo): LLMInput {
     })),
     projects: (userInfo.projects ?? []).map((project) => ({
       name: project.name,
-      ...(project.tech ? { tech: project.tech } : {}),
+      ...(project.tech?.length ? { tech: project.tech } : {}),
       description: project.description,
     })),
     education: (userInfo.education ?? []).map((education) => ({
       degree: education.degree,
-      ...(education.fields_of_study
+      ...(education.fields_of_study?.length
         ? { fields_of_study: education.fields_of_study }
         : {}),
       institution: education.institution,
-      ...(education.courses ? { courses: education.courses } : {}),
+      ...(education.courses?.length ? { courses: education.courses } : {}),
     })),
   };
 }
@@ -308,9 +316,12 @@ export async function userDataFilteringAgent(
     },
   });
 
-  const parsed = filteredUserContentSchema.parse(
-    JSON.parse(response.output_text),
-  );
+  const raw = response.output_text?.trim();
+  if (!raw) {
+    throw new Error("No response from LLM during user data filtering");
+  }
+
+  const parsed = filteredUserContentSchema.parse(JSON.parse(raw));
   const constrained = enforceHardLimits(parsed);
 
   return mergeFilteredContent(userData, constrained);
