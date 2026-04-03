@@ -1,7 +1,8 @@
 import OpenAI from "openai";
 import { ILlmEvaluationResult } from "../../interfaces/IEvaluator";
 import { WritingAnalysis } from "../writing/writingSchema";
-import { maxLength } from "zod";
+import { IUserInfo } from "../../interfaces/IUserInfoResponse";
+import { IJobInfo } from "../../interfaces/IJobInfo";
 
 type CompactEval = {
   s: number;
@@ -48,18 +49,18 @@ const evalSchema = {
 function buildPrompt(includeWritingStyle: boolean): string {
   return includeWritingStyle
     ? [
-        "Evaluate the newest LATEST_DRAFT in this conversation.",
-        "Use USER_DATA, JOB_DATA, WRITING_ANALYSIS, WRITING_SAMPLE, and the newest LATEST_DRAFT only.",
+        "Evaluate the provided DRAFT.",
+        "Use USER_DATA, JOB_DATA, WRITING_ANALYSIS, WRITING_SAMPLE, and the DRAFT only.",
         "Judge clarity, impact, readability, professionalism, job relevance, technical alignment, and style match.",
         "Be strict.",
-        "st,w,r: exactly 3 items each, each <= 75 characters.",
+        "st,w,r: exactly 3 items each, each <=75 chars.",
       ].join(" ")
     : [
-        "Evaluate the newest LATEST_DRAFT in this conversation.",
-        "Use USER_DATA, JOB_DATA, and the newest LATEST_DRAFT only.",
+        "Evaluate the provided DRAFT.",
+        "Use USER_DATA, JOB_DATA, and the DRAFT only.",
         "Judge clarity, impact, readability, professionalism, job relevance, and technical alignment.",
         "Be strict.",
-        "st,w,r: exactly 3 items each, each <= 75 characters.",
+        "st,w,r: exactly 3 items each, each <=75 chars.",
       ].join(" ");
 }
 
@@ -74,17 +75,50 @@ function mapCompactEval(result: CompactEval): ILlmEvaluationResult {
 
 export default async function llmEvaluator(
   clientOpenAI: OpenAI,
-  conversationId: string,
+  draft: string,
+  userData: IUserInfo,
+  jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
+  writingSample?: string,
 ): Promise<ILlmEvaluationResult> {
+  const dataMessage = [
+    "DRAFT:",
+    draft,
+    "",
+    "USER_DATA:",
+    JSON.stringify(userData, null, 2),
+    "",
+    "JOB_DATA:",
+    JSON.stringify(jobData, null, 2),
+    ...(writingAnalysis
+      ? ["", "WRITING_ANALYSIS:", JSON.stringify(writingAnalysis, null, 2)]
+      : []),
+    ...(writingAnalysis && writingSample
+      ? ["", "WRITING_SAMPLE:", writingSample]
+      : []),
+  ].join("\n");
+
   const response = await clientOpenAI.responses.create({
     model: "gpt-5.1",
-    conversation: conversationId,
     temperature: 0.2,
     input: [
       {
         role: "developer",
-        content: buildPrompt(writingAnalysis !== null),
+        content: [
+          {
+            type: "input_text",
+            text: buildPrompt(writingAnalysis !== null),
+          },
+        ],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: dataMessage,
+          },
+        ],
       },
     ],
     text: {

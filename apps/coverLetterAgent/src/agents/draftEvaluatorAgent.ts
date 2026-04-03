@@ -14,19 +14,22 @@ import { IJobInfo } from "../interfaces/IJobInfo";
 
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
-  conversationId: string,
   draft: string,
   userData: IUserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
+  writingSample?: string | undefined,
 ): Promise<IDraftEvaluationResult> {
   const objectiveEvaluation: IObjectiveEvaluationResult =
     await objectiveEvaluator(draft, userData, jobData);
 
   const llmEvaluation: ILlmEvaluationResult = await llmEvaluator(
     clientOpenAI,
-    conversationId,
+    draft,
+    userData,
+    jobData,
     writingAnalysis,
+    writingSample,
   );
 
   const writingStyleEvaluation: IWritingStyleEvaluationResult | null =

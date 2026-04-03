@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { IJobInfo } from "../interfaces/IJobInfo";
 
 type MatchBreakdownLLM = {
   education: number;
@@ -6,6 +8,13 @@ type MatchBreakdownLLM = {
   skills: number;
   projects: number;
   location: number;
+  explanations: {
+    education: string;
+    experience: string;
+    skills: string;
+    projects: string;
+    location: string;
+  };
 };
 
 export type MatchBreakdown = {
@@ -14,8 +23,47 @@ export type MatchBreakdown = {
   skills: number;
   projects: number;
   location: number;
+  explanations: {
+    education: string;
+    experience: string;
+    skills: string;
+    projects: string;
+    location: string;
+  };
   overall: number;
 };
+
+const matchSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    education: { type: "integer", minimum: 0, maximum: 100 },
+    experience: { type: "integer", minimum: 0, maximum: 100 },
+    skills: { type: "integer", minimum: 0, maximum: 100 },
+    projects: { type: "integer", minimum: 0, maximum: 100 },
+    location: { type: "integer", minimum: 0, maximum: 100 },
+    explanations: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        education: { type: "string", maxLength: 120 },
+        experience: { type: "string", maxLength: 120 },
+        skills: { type: "string", maxLength: 120 },
+        projects: { type: "string", maxLength: 120 },
+        location: { type: "string", maxLength: 120 },
+      },
+      required: ["education", "experience", "skills", "projects", "location"],
+    },
+  },
+  required: [
+    "education",
+    "experience",
+    "skills",
+    "projects",
+    "location",
+    "explanations",
+  ],
+} as const;
 
 function clampScore(n: unknown): number {
   const x = typeof n === "number" ? n : Number(n);
@@ -23,67 +71,72 @@ function clampScore(n: unknown): number {
   return Math.max(0, Math.min(100, Math.round(x)));
 }
 
-function extractJsonObject(text: string): unknown {
-  // Fast path
-  try {
-    return JSON.parse(text);
-  } catch {
-    // Fallback: extract first {...} block
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start >= 0 && end > start) {
-      const candidate = text.slice(start, end + 1);
-      return JSON.parse(candidate);
-    }
-    throw new Error(`LLM did not return JSON: ${text}`);
-  }
+function buildPrompt(): string {
+  return `
+    Score how well the applicant matches the job in each category from 0 to 100.
+    Use ONLY: USER_DATA and JOB_DATA.
+
+    TASK:
+    Score each category from 0 to 100:
+    - skills: overlap between user's listed skills/projects tech and job requirements
+    - experience: relevance of prior roles and responsibilities to the job
+    - education: degree/major/coursework alignment to requirements; if no education is required, education should be 100
+    - projects: relevance of projects to the job domain or stack
+    - location: match to job location, remote, hybrid, or in-person constraints; if fully remote, location should be 100
+
+    For EACH category, also provide a ONE-SENTENCE explanation (<=120 chars) explaining the score.
+
+    Be strict and realistic.
+    Return only the JSON object matching the required schema.
+  `.trim();
+}
+
+function buildDataMessage(userData: IUserInfo, jobData: IJobInfo): string {
+  return [
+    "USER_DATA:",
+    JSON.stringify(userData, null, 2),
+    "",
+    "JOB_DATA:",
+    JSON.stringify(jobData, null, 2),
+  ].join("\n");
 }
 
 export default async function skillsMatchEvaluatorAgent(
   clientOpenAI: OpenAI,
-  conversationId: string,
+  userData: IUserInfo,
+  jobData: IJobInfo,
 ): Promise<MatchBreakdown> {
-  const prompt = `
-  You are a professional career counselor.
-  Use ONLY the conversation items labeled USER_DATA and JOB_DATA.
-
-  Task:
-  Score how well the applicant matches the job in each category (0-100):
-  - skills: overlap between user's listed skills/projects tech and job requirements
-  - experience: relevance of prior roles + responsibilities to the job
-  - education: degree/major/courses alignment to requirements (if none required, education should be 100)
-  - projects: relevance of projects to the job domain/stack
-  - location: match to job locations/remote/hybrid constraints (if remote, location should be 100)
-
-  STRICT OUTPUT STRUCTURE:
-  Return ONLY a single JSON object with EXACTLY these keys and integer values 0-100:
-
-  {
-    "education": number,
-    "experience": number,
-    "skills": number,
-    "projects": number,
-    "location": number
-  }
-
-  No commentary. No markdown. No extra keys.
-  `.trim();
-
-  await clientOpenAI.conversations.items.create(conversationId, {
-    items: [
-      {
-        type: "message",
-        role: "user",
-        content: [{ type: "input_text", text: prompt }],
-      },
-    ],
-  });
-
   const response = await clientOpenAI.responses.create({
     model: "gpt-5.1",
-    conversation: conversationId,
-    input: "Return the JSON score object now.",
     temperature: 0,
+    input: [
+      {
+        role: "developer",
+        content: [
+          {
+            type: "input_text",
+            text: buildPrompt(),
+          },
+        ],
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: buildDataMessage(userData, jobData),
+          },
+        ],
+      },
+    ],
+    text: {
+      format: {
+        type: "json_schema",
+        name: "match_breakdown",
+        strict: true,
+        schema: matchSchema,
+      },
+    },
   });
 
   const raw = response.output_text?.trim();
@@ -91,7 +144,12 @@ export default async function skillsMatchEvaluatorAgent(
     throw new Error("No response from LLM during skill matching evaluation");
   }
 
-  const parsed = extractJsonObject(raw) as Partial<MatchBreakdownLLM>;
+  let parsed: MatchBreakdownLLM;
+  try {
+    parsed = JSON.parse(raw) as MatchBreakdownLLM;
+  } catch (err) {
+    throw new Error(`Failed to parse match breakdown output: ${String(err)}`);
+  }
 
   const education = clampScore(parsed.education);
   const experience = clampScore(parsed.experience);
@@ -113,6 +171,7 @@ export default async function skillsMatchEvaluatorAgent(
     skills,
     projects,
     location,
+    explanations: parsed.explanations,
     overall,
   };
 }

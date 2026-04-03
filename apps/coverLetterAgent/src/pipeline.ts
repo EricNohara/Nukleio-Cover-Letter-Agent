@@ -7,7 +7,6 @@ import firstDraftAgent from "./agents/firstDraftAgent";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
 import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
 import revisionAgent from "./agents/revisionAgent";
-import { createConversation, storeLatestDraft } from "./utils/ai/conversation";
 import userRevisionAgent from "./agents/userRevisionAgent";
 import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
@@ -37,24 +36,14 @@ async function runCorePipeline({
     ? await writingAnalysisAgent(clientOpenAI, cleanedWritingSample)
     : null;
 
-  // create a conversation to reuse past inputted data
-  const conversationId = await createConversation(
+  // invoke cover letter first draft agent
+  let currentDraft: string = await firstDraftAgent(
     clientOpenAI,
     userData,
     jobData,
     writingAnalysis,
-    cleanedWritingSample ?? null,
+    writingSample,
   );
-
-  // invoke cover letter first draft agent
-  let currentDraft: string = await firstDraftAgent(
-    clientOpenAI,
-    conversationId,
-    writingAnalysis,
-  );
-
-  // store the draft in the conversation
-  await storeLatestDraft(clientOpenAI, conversationId, currentDraft);
 
   // evaluation feedback loop
   let iterationCount = 0;
@@ -64,11 +53,11 @@ async function runCorePipeline({
     // invoke draft evaluator agent
     lastEvaluation = await draftEvaluatorAgent(
       clientOpenAI,
-      conversationId,
       currentDraft,
       userData,
       jobData,
       writingAnalysis,
+      writingSample,
     );
 
     // Determine pass/fail
@@ -95,22 +84,31 @@ async function runCorePipeline({
     // Produce revised draft
     currentDraft = await revisionAgent(
       clientOpenAI,
-      conversationId,
       lastEvaluation,
+      currentDraft,
+      userData,
+      jobData,
       writingAnalysis,
+      writingSample,
     );
-
-    // store latest draft in the conversation
-    await storeLatestDraft(clientOpenAI, conversationId, currentDraft);
   }
 
-  // calculate skills match score
+  // calculate skills match score at the end
   const skillsMatchScore = await skillsMatchEvaluatorAgent(
     clientOpenAI,
-    conversationId,
+    userData,
+    jobData,
   );
 
-  return { currentDraft, conversationId, skillsMatchScore };
+  // return things needed to store session
+  return {
+    userData,
+    jobData,
+    writingAnalysis,
+    writingSample,
+    currentDraft,
+    skillsMatchScore,
+  };
 }
 
 // pipeline for job research agentic workflow
@@ -159,27 +157,24 @@ export async function runPipeline({
 
 // for user revisions
 export async function runRevisionPipeline({
-  conversationId,
+  sessionId,
   feedback,
 }: {
-  conversationId: string;
+  sessionId: string;
   feedback: string;
 }) {
-  const clientOpenAI = getOpenAIClient();
-
-  // generate the revised draft
-  const revisedDraft = await userRevisionAgent(
-    clientOpenAI,
-    conversationId,
-    feedback,
-  );
-
-  // generate the draft name from revision
-  const draftName = await revisionDraftNamingAgent(
-    clientOpenAI,
-    conversationId,
-    feedback,
-  );
-
-  return { revisedDraft, draftName };
+  // const clientOpenAI = getOpenAIClient();
+  // // generate the revised draft
+  // const revisedDraft = await userRevisionAgent(
+  //   clientOpenAI,
+  //   conversationId,
+  //   feedback,
+  // );
+  // // generate the draft name from revision
+  // const draftName = await revisionDraftNamingAgent(
+  //   clientOpenAI,
+  //   conversationId,
+  //   feedback,
+  // );
+  // return { revisedDraft, draftName };
 }
