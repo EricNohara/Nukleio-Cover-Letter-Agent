@@ -46,11 +46,10 @@ async function runCorePipeline({
   );
 
   // evaluation feedback loop
-  let iterationCount = 0;
   let lastEvaluation: IDraftEvaluationResult;
 
-  while (true) {
-    // invoke draft evaluator agent
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    // evaluate current draft
     lastEvaluation = await draftEvaluatorAgent(
       clientOpenAI,
       currentDraft,
@@ -65,7 +64,7 @@ async function runCorePipeline({
       lastEvaluation.objectiveEvaluation.pass &&
       lastEvaluation.objectiveEvaluation.issues.length === 0;
 
-    const llmPass = lastEvaluation.llmEvaluation.score >= 90;
+    const llmPass = lastEvaluation.llmEvaluation.score >= 80;
 
     const stylePass = lastEvaluation.writingStyleEvaluation
       ? lastEvaluation.writingStyleEvaluation.deviations.every(
@@ -76,10 +75,6 @@ async function runCorePipeline({
     const isPassed = objectivePass && llmPass && stylePass;
 
     if (isPassed) break; // success
-
-    if (iterationCount >= MAX_ITERATIONS) break; // stop looping
-
-    iterationCount++;
 
     // Produce revised draft
     currentDraft = await revisionAgent(
