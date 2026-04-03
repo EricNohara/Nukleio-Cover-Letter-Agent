@@ -195,8 +195,5 @@ export async function runRevisionPipeline({
   return {
     revisedDraft,
     draftName,
-    jobData: session.jobData,
-    writingAnalysis: session.writingAnalysis,
-    writingSample: session.writingSample,
   };
 }
