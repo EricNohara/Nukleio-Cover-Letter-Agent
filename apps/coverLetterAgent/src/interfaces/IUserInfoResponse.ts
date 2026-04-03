@@ -47,7 +47,6 @@ export interface IUserEducationRaw {
   minors: string[];
   gpa: string | null;
   institution: string;
-  awards: string[];
   courses: IUserCourseRaw[];
 }
 
@@ -80,6 +79,5 @@ export interface IUserEducation {
   degree: string;
   fields_of_study?: string[];
   institution: string;
-  awards?: string[];
   courses?: string[];
 }

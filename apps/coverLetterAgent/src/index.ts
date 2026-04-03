@@ -12,9 +12,10 @@ const generateCoverLetterSchema = z.object({
 });
 
 const reviseSchema = z.object({
-  conversationId: z.string(),
+  userId: z.string(),
+  // db session with data from the generation
+  sessionId: z.string(),
   feedback: z.string(),
-  finalLetter: z.string().optional(),
 });
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {

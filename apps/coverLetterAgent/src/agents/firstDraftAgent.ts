@@ -1,14 +1,13 @@
 import OpenAI from "openai";
 import { WritingAnalysis } from "../utils/writing/writingSchema";
+import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { IJobInfo } from "../interfaces/IJobInfo";
 
 function generatePrompt(writingAnalysis: WritingAnalysis | null) {
-  return `You are a cover letter writer.
+  return `
+You are a cover letter writer.
 
-Write a 250 - 400 word cover letter using:
-- USER_DATA
-- JOB_DATA
-${writingAnalysis ? "- WRITING_ANALYSIS" : ""}
-${writingAnalysis ? "- WRITING_SAMPLE" : ""}
+Write a 250 - 400 word cover letter using USER_DATA, JOB_DATA${writingAnalysis ? ", WRITING_ANALYSIS" : ""}${writingAnalysis ? ", WRITING_SAMPLE" : ""}.
 
 STRICT LETTER STRUCTURE:
 1. Applicant name + contact info + date
@@ -19,49 +18,79 @@ STRICT LETTER STRUCTURE:
 6. "Sincerely," + 2 - 4 blank lines + applicant's full name
 
 HARD REQUIREMENTS:
-- Use the user's real experiences only
+- Use the user's real information only
 - Map technical skills directly to job requirements
 - Slight imperfections allowed
-- Vary sentence length. Keep sentences shorter than 25 words.
-- Avoid cliches / buzzwords
-${
-  writingAnalysis
-    ? "- Use the same writing style and tone as the inputted writing sample and the analysis of the sample."
-    : ""
+- Vary sentence length
+- Keep sentences shorter than 25 words
+- Avoid buzzwords
+${writingAnalysis ? "- Match the writing style to the WRITING_SAMPLE and WRITING_ANALYSIS." : ""}
+- OUTPUT FORMAT: ONLY the plain text cover letter
+- WORD COUNT: 250 - 400 words
+- PARAGRAPH COUNT: 3 - 5 paragraphs
+`.trim();
 }
-- OUTPUT FORMAT: ONLY plain text cover letter, NOTHING else.
-- WORD COUNT: 250 - 400 words.
-- PARAGRAPH COUNT: 3 - 5 paragraphs.
-  `.trim();
+
+function buildDataMessage(
+  userData: IUserInfo,
+  jobData: IJobInfo,
+  writingAnalysis: WritingAnalysis | null,
+  writingSample?: string,
+) {
+  return [
+    "USER_DATA:",
+    JSON.stringify(userData, null, 2),
+    "",
+    "JOB_DATA:",
+    JSON.stringify(jobData, null, 2),
+    ...(writingAnalysis
+      ? ["", "WRITING_ANALYSIS:", JSON.stringify(writingAnalysis, null, 2)]
+      : []),
+    ...(writingAnalysis && writingSample
+      ? ["", "WRITING_SAMPLE:", writingSample]
+      : []),
+  ].join("\n");
 }
 
 export default async function firstDraftAgent(
   clientOpenAI: OpenAI,
-  conversationId: string,
-  writingAnalysis: WritingAnalysis | null
-) {
-  const prompt = generatePrompt(writingAnalysis);
-
-  // generate the draft
-  await clientOpenAI.conversations.items.create(conversationId, {
-    items: [
+  userData: IUserInfo,
+  jobData: IJobInfo,
+  writingAnalysis: WritingAnalysis | null,
+  writingSample?: string,
+): Promise<string> {
+  const response = await clientOpenAI.responses.create({
+    model: "gpt-5.1",
+    temperature: 0.85,
+    input: [
       {
-        type: "message",
+        role: "system",
+        content: [
+          {
+            type: "input_text",
+            text: generatePrompt(writingAnalysis),
+          },
+        ],
+      },
+      {
         role: "user",
-        content: [{ type: "input_text", text: prompt }],
+        content: [
+          {
+            type: "input_text",
+            text: buildDataMessage(
+              userData,
+              jobData,
+              writingAnalysis,
+              writingSample,
+            ),
+          },
+        ],
       },
     ],
   });
 
-  // 2. Ask the model to produce the letter using stored context
-  const response = await clientOpenAI.responses.create({
-    model: "gpt-5.1",
-    conversation: conversationId,
-    input: "Generate the 250 - 400 word cover letter now.",
-    temperature: 0.85,
-  });
-
   const draft = response.output_text?.trim();
+
   if (!draft) {
     throw new Error("No response from LLM during cover letter generation");
   }

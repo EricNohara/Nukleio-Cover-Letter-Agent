@@ -6,7 +6,7 @@ import { IWritingStyleEvaluationResult } from "../../interfaces/IEvaluator";
 function compareMetric(
   name: string,
   userValue: number,
-  draftValue: number
+  draftValue: number,
 ): {
   metric: string;
   userValue: number;
@@ -38,28 +38,28 @@ function compareMetric(
 
 export function compareWritingStyles(
   userStyle: WritingAnalysis,
-  draftStyle: WritingAnalysis
+  draftStyle: WritingAnalysis,
 ) {
   const deviations = [
     compareMetric(
       "avgSentenceLength",
       userStyle.avgSentenceLength,
-      draftStyle.avgSentenceLength
+      draftStyle.avgSentenceLength,
     ),
     compareMetric(
       "avgSyllablesPerWord",
       userStyle.avgSyllablesPerWord,
-      draftStyle.avgSyllablesPerWord
+      draftStyle.avgSyllablesPerWord,
     ),
     compareMetric(
       "fleschKincaidGrade",
       userStyle.fleschKincaidGrade,
-      draftStyle.fleschKincaidGrade
+      draftStyle.fleschKincaidGrade,
     ),
     compareMetric(
       "punctuationComplexity",
       userStyle.punctuationComplexity,
-      draftStyle.punctuationComplexity
+      draftStyle.punctuationComplexity,
     ),
   ];
 
@@ -74,14 +74,14 @@ export function compareWritingStyles(
         `${
           d.metric
         } is higher than user's usual writing (${d.difference.toFixed(
-          2
-        )}). Severity: ${d.severity}.`
+          2,
+        )}). Severity: ${d.severity}.`,
       );
     } else {
       summary.push(
         `${d.metric} is lower than user's usual writing (${d.difference.toFixed(
-          2
-        )}). Severity: ${d.severity}.`
+          2,
+        )}). Severity: ${d.severity}.`,
       );
     }
   });
@@ -92,20 +92,20 @@ export function compareWritingStyles(
 export default async function writingStyleEvaluator(
   clientOpenAI: OpenAI,
   draft: string,
-  writingAnalysis: WritingAnalysis | null
+  writingAnalysis: WritingAnalysis | null,
 ): Promise<IWritingStyleEvaluationResult | null> {
   if (!writingAnalysis) return null;
 
   const draftWritingAnalysis: WritingAnalysis = await writingAnalysisAgent(
     clientOpenAI,
     draft,
-    true
+    true,
   );
 
   // compare to user's writing analysis
   const comparison: IWritingStyleEvaluationResult = compareWritingStyles(
     writingAnalysis,
-    draftWritingAnalysis
+    draftWritingAnalysis,
   );
 
   // output comparison

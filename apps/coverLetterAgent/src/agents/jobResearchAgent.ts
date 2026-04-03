@@ -52,77 +52,85 @@ const jobInfoSchema = {
     type: "object",
     additionalProperties: false,
     properties: {
-      role_summary: {
-        type: "string",
-        description: "Short role summary. Max 2 sentences, 300 characters.",
-      },
       work_mode: {
-        type: "string",
-        enum: ["remote", "hybrid", "onsite"],
+        type: ["string", "null"],
+        enum: ["remote", "hybrid", "onsite", null],
       },
       locations: {
-        type: "array",
+        type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       qualifications: {
-        type: "array",
+        type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       responsibilities: {
-        type: "array",
+        type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       technologies: {
-        type: "array",
+        type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 8,
       },
       company: {
-        type: "object",
+        type: ["object", "null"],
         additionalProperties: false,
         properties: {
-          industry: { type: "string" },
+          industry: { type: ["string", "null"] },
           company_summary: {
-            type: "string",
+            type: ["string", "null"],
+            maxLength: 200,
             description:
-              "Short company summary. Max 2 sentence, 300 characters.",
+              "Short company summary. Max 2 sentences, 200 characters.",
           },
         },
-        required: [],
+        required: ["industry", "company_summary"],
       },
       hiring_team: {
-        type: "array",
+        type: ["array", "null"],
         items: {
           type: "object",
           additionalProperties: false,
           properties: {
-            name: { type: "string" },
+            name: { type: ["string", "null"] },
           },
-          required: [],
+          required: ["name"],
         },
       },
     },
-    required: [],
+    required: [
+      "work_mode",
+      "locations",
+      "qualifications",
+      "responsibilities",
+      "technologies",
+      "company",
+      "hiring_team",
+    ],
   },
 } as const;
 
 function buildPrompt() {
   return `
-    Extract structured job info from pasted job text for a cover-letter drafting agent.
-    
-    RULES:
-    - Return ONLY supported fields.
-    - Omit missing, uncertain, redundant fields.
-    - Be concise, keeping only the most IMPORTANT info.
-    - Include work_mode only if clearly supported by the text.
-    - Ignore perks, testimonials, compensation, and marketing unless useful for understanding the role.
+Extract structured job info for a cover-letter drafting agent.
 
-    CONSTRAINTS:
-    - role_summary: max 2 sentences, 300 characters. Do NOT copy large blocks from the posting.
-    - company.company_summary: max 2 sentences, 300 characters. Do NOT copy large blocks from the posting.
-    - qualifications: max 5
-    - responsibilities: max 5
-    - technologies: max 10
-    - locations: max 5
+RULES:
+- Return only supported fields.
+- Be concise and keep only the most important information.
+- Include fields only if clearly supported by the text.
+- Ignore perks, testimonials, compensation, and marketing unless useful for understanding the role.
+- Do not copy large blocks from the posting.
+
+CONSTRAINTS:
+- company.company_summary <= 2 sentences, 200 characters.
+- qualifications <= 4 items.
+- responsibilities <= 4 items.
+- technologies <= 8 items.
+- locations <= 4 items.
   `.trim();
 }
 
@@ -132,8 +140,6 @@ export default async function jobResearchAgent(
   jobTitle: string,
   companyName: string,
 ): Promise<IJobInfo> {
-  const prompt = buildPrompt();
-
   const completion = await clientOpenAI.chat.completions.create({
     model: "gpt-5.1",
     temperature: 0,
@@ -144,7 +150,7 @@ export default async function jobResearchAgent(
     messages: [
       {
         role: "developer",
-        content: prompt,
+        content: buildPrompt(),
       },
       {
         role: "user",
@@ -167,7 +173,7 @@ export default async function jobResearchAgent(
 
   const cleaned = removeEmptyFields<IJobInfoLlmResponse>(extracted);
 
-  const jobInfo: IJobInfo = removeEmptyFields<IJobInfo>({
+  return removeEmptyFields<IJobInfo>({
     ...cleaned,
     job_title: jobTitle,
     company: removeEmptyFields({
@@ -175,6 +181,4 @@ export default async function jobResearchAgent(
       ...(cleaned.company ?? {}),
     }),
   });
-
-  return jobInfo;
 }
