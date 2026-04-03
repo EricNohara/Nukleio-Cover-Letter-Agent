@@ -12,6 +12,7 @@ const generateCoverLetterSchema = z.object({
 });
 
 const reviseSchema = z.object({
+  userId: z.string(),
   // db session with data from the generation
   sessionId: z.string(),
   feedback: z.string(),

@@ -52,10 +52,6 @@ const jobInfoSchema = {
     type: "object",
     additionalProperties: false,
     properties: {
-      role_summary: {
-        type: ["string", "null"],
-        description: "Short role summary. Max 2 sentences, 300 characters.",
-      },
       work_mode: {
         type: ["string", "null"],
         enum: ["remote", "hybrid", "onsite", null],
@@ -63,18 +59,22 @@ const jobInfoSchema = {
       locations: {
         type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       qualifications: {
         type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       responsibilities: {
         type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 4,
       },
       technologies: {
         type: ["array", "null"],
         items: { type: "string" },
+        maxItems: 8,
       },
       company: {
         type: ["object", "null"],
@@ -83,8 +83,9 @@ const jobInfoSchema = {
           industry: { type: ["string", "null"] },
           company_summary: {
             type: ["string", "null"],
+            maxLength: 200,
             description:
-              "Short company summary. Max 2 sentences, 300 characters.",
+              "Short company summary. Max 2 sentences, 200 characters.",
           },
         },
         required: ["industry", "company_summary"],
@@ -102,7 +103,6 @@ const jobInfoSchema = {
       },
     },
     required: [
-      "role_summary",
       "work_mode",
       "locations",
       "qualifications",
@@ -116,23 +116,21 @@ const jobInfoSchema = {
 
 function buildPrompt() {
   return `
-Extract structured job info from pasted job text for a cover-letter drafting agent.
+Extract structured job info for a cover-letter drafting agent.
 
 RULES:
 - Return only supported fields.
-- Fields with missing or uncertain values may be null.
 - Be concise and keep only the most important information.
-- Include work_mode only if clearly supported by the text.
+- Include fields only if clearly supported by the text.
 - Ignore perks, testimonials, compensation, and marketing unless useful for understanding the role.
 - Do not copy large blocks from the posting.
 
 CONSTRAINTS:
-- role_summary: max 2 sentences, 300 characters.
-- company.company_summary: max 2 sentences, 300 characters.
-- qualifications: max 5 items.
-- responsibilities: max 5 items.
-- technologies: max 10 items.
-- locations: max 5 items.
+- company.company_summary <= 2 sentences, 200 characters.
+- qualifications <= 4 items.
+- responsibilities <= 4 items.
+- technologies <= 8 items.
+- locations <= 4 items.
   `.trim();
 }
 

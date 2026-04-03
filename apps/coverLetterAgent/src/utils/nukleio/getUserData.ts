@@ -85,15 +85,12 @@ export default async function getUserData(
               .map((c) => c.description)
               .filter(isNonEmptyString);
 
-            const awards = (ed.awards ?? []).filter(isNonEmptyString);
-
             return {
               degree: ed.degree,
               institution: ed.institution,
               ...(fieldsOfStudy.length
                 ? { fields_of_study: fieldsOfStudy }
                 : {}),
-              ...(awards.length ? { awards } : {}),
               ...(courses.length ? { courses } : {}),
             };
           }),

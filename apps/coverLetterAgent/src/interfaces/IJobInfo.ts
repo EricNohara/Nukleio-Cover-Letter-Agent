@@ -1,5 +1,4 @@
 export interface IJobInfoLlmResponse {
-  role_summary?: string;
   work_mode?: "remote" | "hybrid" | "onsite";
   locations?: string[];
   qualifications?: string[];
@@ -15,7 +14,6 @@ export interface IJobInfoLlmResponse {
 }
 
 export interface IJobInfo {
-  role_summary?: string;
   work_mode?: "remote" | "hybrid" | "onsite";
   locations?: string[];
   qualifications?: string[];

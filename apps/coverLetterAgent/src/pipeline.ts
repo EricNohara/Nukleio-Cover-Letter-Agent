@@ -13,6 +13,7 @@ import jobResearchAgent from "./agents/jobResearchAgent";
 import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
 import { IJobInfo } from "./interfaces/IJobInfo";
+import { userDataFilteringAgent } from "./agents/userDataFilteringAgent";
 
 const MAX_ITERATIONS = 2;
 
@@ -97,7 +98,6 @@ async function runCorePipeline({
 
   // return things needed to store session
   return {
-    userData,
     jobData,
     writingAnalysis,
     writingSample,
@@ -142,9 +142,16 @@ export async function runPipeline({
     throw new Error("Failed to research inputted job. Please try again.");
   }
 
-  return await runCorePipeline({
+  // filter user data for the job
+  const filteredUserData: IUserInfo = await userDataFilteringAgent(
     clientOpenAI,
     userData,
+    jobData,
+  );
+
+  return await runCorePipeline({
+    clientOpenAI,
+    userData: filteredUserData,
     jobData,
     writingSample,
   });
@@ -152,13 +159,18 @@ export async function runPipeline({
 
 // for user revisions
 export async function runRevisionPipeline({
+  userId,
   sessionId,
   feedback,
 }: {
+  userId: string;
   sessionId: string;
   feedback: string;
 }) {
-  // const clientOpenAI = getOpenAIClient();
+  const clientOpenAI = getOpenAIClient();
+
+  // get user info
+
   // // generate the revised draft
   // const revisedDraft = await userRevisionAgent(
   //   clientOpenAI,
