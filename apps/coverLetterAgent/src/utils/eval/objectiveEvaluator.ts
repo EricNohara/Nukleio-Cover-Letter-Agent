@@ -1,11 +1,11 @@
 import { IObjectiveEvaluationResult } from "../../interfaces/IEvaluator";
-import { ITheirStackJob } from "../../interfaces/ITheirStackResponse";
+import { IJobInfo } from "../../interfaces/IJobInfo";
 import { IUserInfo } from "../../interfaces/IUserInfoResponse";
 
 export async function objectiveEvaluator(
   draft: string,
   userData: IUserInfo,
-  jobData: ITheirStackJob
+  jobData: IJobInfo,
 ): Promise<IObjectiveEvaluationResult> {
   const issues: string[] = [];
 
@@ -55,7 +55,7 @@ export async function objectiveEvaluator(
   if (jobData.hiring_team && jobData.hiring_team.length > 0) {
     const possibleNames = jobData.hiring_team
       .flatMap((m) => {
-        const full = m.full_name?.trim();
+        const full = m.name?.trim();
         if (!full) return [];
 
         // Split into words
@@ -63,12 +63,12 @@ export async function objectiveEvaluator(
 
         // Remove punctuation from each part
         const strippedParts = parts.map(
-          (p) => p.replace(/^[^\w]+|[^\w]+$/g, "") // remove punctuation at start/end
+          (p) => p.replace(/^[^\w]+|[^\w]+$/g, ""), // remove punctuation at start/end
         );
 
         // Remove suffixes or certifications
         const cleanedParts = strippedParts.filter(
-          (p) => !/^(cpsr|phd|md|jr|sr|ii|iii|iv)$/i.test(p)
+          (p) => !/^(cpsr|phd|md|jr|sr|ii|iii|iv)$/i.test(p),
         );
 
         const cleanedFull = cleanedParts.join(" ");
@@ -88,8 +88,8 @@ export async function objectiveEvaluator(
       if (!matchesKnown) {
         issues.push(
           `Greeting appears to not use available recruiter name. Expected one of: ${possibleNames.join(
-            ", "
-          )}`
+            ", ",
+          )}`,
         );
       }
     }
@@ -106,14 +106,14 @@ export async function objectiveEvaluator(
   const closingRegex = new RegExp(
     `Sincerely,\\s*(?:\\n\\s*){2,4}${userData.name.replace(
       /[.*+?^${}()|[\\]\\\\]/g,
-      "\\$&"
+      "\\$&",
     )}`,
-    "i"
+    "i",
   );
 
   if (!closingRegex.test(normalized)) {
     issues.push(
-      `Closing format incorrect. Must be "Sincerely," followed by 2 - 4 blank lines, then "${userData.name}".`
+      `Closing format incorrect. Must be "Sincerely," followed by 2 - 4 blank lines, then "${userData.name}".`,
     );
   }
 
