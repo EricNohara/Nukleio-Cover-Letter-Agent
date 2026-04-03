@@ -59,7 +59,7 @@ const filteredUserContentSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        tech: z.array(z.string()).optional(),
+        tech: z.array(z.string()).nullable(),
         description: z.string().max(75),
       }),
     )
@@ -68,12 +68,12 @@ const filteredUserContentSchema = z.object({
     .array(
       z.object({
         degree: z.string(),
-        fields_of_study: z.array(z.string()).optional(),
+        fields_of_study: z.array(z.string()).nullable(),
         institution: z.string(),
         courses: z
           .array(z.string())
           .max(DEFAULT_LIMITS.maxCoursesPerEducation)
-          .optional(),
+          .nullable(),
       }),
     )
     .max(DEFAULT_LIMITS.maxEducations),
@@ -147,12 +147,20 @@ function enforceHardLimits(data: FilteredUserContent): FilteredUserContent {
   return {
     skills: data.skills.slice(0, DEFAULT_LIMITS.maxSkills),
     experiences: data.experiences.slice(0, DEFAULT_LIMITS.maxExperiences),
-    projects: data.projects.slice(0, DEFAULT_LIMITS.maxProjects),
+    projects: data.projects
+      .slice(0, DEFAULT_LIMITS.maxProjects)
+      .map((project) => ({
+        ...project,
+        tech: project.tech ?? null,
+      })),
     education: data.education
       .slice(0, DEFAULT_LIMITS.maxEducations)
       .map((edu) => ({
         ...edu,
-        courses: edu.courses?.slice(0, DEFAULT_LIMITS.maxCoursesPerEducation),
+        fields_of_study: edu.fields_of_study ?? null,
+        courses: edu.courses
+          ? edu.courses.slice(0, DEFAULT_LIMITS.maxCoursesPerEducation)
+          : null,
       })),
   };
 }
@@ -177,8 +185,17 @@ function mergeFilteredContent(
 
     skills: filtered.skills,
     experiences: filtered.experiences as IUserExperience[],
-    projects: filtered.projects as IUserProject[],
-    education: filtered.education as IUserEducation[],
+    projects: filtered.projects.map((project) => ({
+      name: project.name,
+      ...(project.tech ? { tech: project.tech } : {}),
+      description: project.description,
+    })) as IUserProject[],
+    education: filtered.education.map((edu) => ({
+      degree: edu.degree,
+      institution: edu.institution,
+      ...(edu.fields_of_study ? { fields_of_study: edu.fields_of_study } : {}),
+      ...(edu.courses ? { courses: edu.courses } : {}),
+    })) as IUserEducation[],
   };
 }
 
@@ -248,12 +265,12 @@ export async function userDataFilteringAgent(
                 properties: {
                   name: { type: "string" },
                   tech: {
-                    type: "array",
+                    type: ["array", "null"],
                     items: { type: "string" },
                   },
                   description: { type: "string", maxLength: 75 },
                 },
-                required: ["name", "description"],
+                required: ["name", "tech", "description"],
               },
               maxItems: DEFAULT_LIMITS.maxProjects,
             },
@@ -265,17 +282,22 @@ export async function userDataFilteringAgent(
                 properties: {
                   degree: { type: "string" },
                   fields_of_study: {
-                    type: "array",
+                    type: ["array", "null"],
                     items: { type: "string" },
                   },
                   institution: { type: "string" },
                   courses: {
-                    type: "array",
+                    type: ["array", "null"],
                     items: { type: "string" },
                     maxItems: DEFAULT_LIMITS.maxCoursesPerEducation,
                   },
                 },
-                required: ["degree", "institution"],
+                required: [
+                  "degree",
+                  "fields_of_study",
+                  "institution",
+                  "courses",
+                ],
               },
               maxItems: DEFAULT_LIMITS.maxEducations,
             },
