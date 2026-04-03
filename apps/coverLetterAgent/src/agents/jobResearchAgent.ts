@@ -141,7 +141,7 @@ export default async function jobResearchAgent(
   companyName: string,
 ): Promise<IJobInfo> {
   const completion = await clientOpenAI.chat.completions.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-nano",
     temperature: 0,
     response_format: {
       type: "json_schema",

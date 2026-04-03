@@ -60,7 +60,7 @@ export default async function firstDraftAgent(
   writingSample?: string,
 ): Promise<string> {
   const response = await clientOpenAI.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-mini",
     temperature: 0.85,
     input: [
       {

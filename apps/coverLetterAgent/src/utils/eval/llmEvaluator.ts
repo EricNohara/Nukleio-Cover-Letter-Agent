@@ -99,7 +99,7 @@ export default async function llmEvaluator(
   ].join("\n");
 
   const response = await clientOpenAI.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-mini",
     temperature: 0.2,
     input: [
       {

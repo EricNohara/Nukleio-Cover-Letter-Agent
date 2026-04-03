@@ -80,7 +80,7 @@ export default async function userRevisionAgent(
   );
 
   const response = await clientOpenAI.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-mini",
     input: prompt,
     temperature: 0.85,
   });
