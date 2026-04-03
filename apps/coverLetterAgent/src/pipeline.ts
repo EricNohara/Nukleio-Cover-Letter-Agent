@@ -2,7 +2,6 @@ import getUserData from "./utils/nukleio/getUserData";
 import writingAnalysisAgent from "./agents/writingAnalysisAgent";
 import { WritingAnalysis } from "./utils/writing/writingSchema";
 import getOpenAIClient from "./utils/ai/getOpenAIClient";
-import { ITheirStackJob } from "./interfaces/ITheirStackResponse";
 import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
@@ -14,6 +13,7 @@ import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
 import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
+import { IJobInfo } from "./interfaces/IJobInfo";
 
 const MAX_ITERATIONS = 2;
 
@@ -25,7 +25,7 @@ async function runCorePipeline({
 }: {
   clientOpenAI: OpenAI;
   userData: IUserInfo;
-  jobData: ITheirStackJob;
+  jobData: IJobInfo;
   writingSample?: string | undefined;
 }) {
   // invoke writing analysis agent
@@ -138,7 +138,7 @@ export async function runPipeline({
   }
 
   // invoke job research agent
-  const jobData: ITheirStackJob = await jobResearchAgent(
+  const jobData: IJobInfo = await jobResearchAgent(
     clientOpenAI,
     jobDescriptionDump,
     jobTitle,

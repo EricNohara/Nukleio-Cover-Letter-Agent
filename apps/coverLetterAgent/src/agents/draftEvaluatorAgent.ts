@@ -8,17 +8,17 @@ import {
   IObjectiveEvaluationResult,
   IWritingStyleEvaluationResult,
 } from "../interfaces/IEvaluator";
-import { ITheirStackJob } from "../interfaces/ITheirStackResponse";
 import llmEvaluator from "../utils/eval/llmEvaluator";
 import writingStyleEvaluator from "../utils/eval/writingStyleEvaluator";
+import { IJobInfo } from "../interfaces/IJobInfo";
 
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
   conversationId: string,
   draft: string,
   userData: IUserInfo,
-  jobData: ITheirStackJob,
-  writingAnalysis: WritingAnalysis | null
+  jobData: IJobInfo,
+  writingAnalysis: WritingAnalysis | null,
 ): Promise<IDraftEvaluationResult> {
   const objectiveEvaluation: IObjectiveEvaluationResult =
     await objectiveEvaluator(draft, userData, jobData);
@@ -26,7 +26,7 @@ export default async function draftEvaluatorAgent(
   const llmEvaluation: ILlmEvaluationResult = await llmEvaluator(
     clientOpenAI,
     conversationId,
-    writingAnalysis
+    writingAnalysis,
   );
 
   const writingStyleEvaluation: IWritingStyleEvaluationResult | null =
