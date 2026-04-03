@@ -14,6 +14,7 @@ import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
 import { IJobInfo } from "./interfaces/IJobInfo";
 import { userDataFilteringAgent } from "./agents/userDataFilteringAgent";
+import { getCoverLetterSession } from "./utils/nukleio/getCoverLetterSession";
 
 const MAX_ITERATIONS = 2;
 
@@ -125,7 +126,6 @@ export async function runPipeline({
 
   // retrieve user data
   const userData: IUserInfo | null = await getUserData(userId);
-
   if (!userData) {
     throw new Error(`User with id ${userId} not found.`);
   }
@@ -157,7 +157,7 @@ export async function runPipeline({
   });
 }
 
-// for user revisions
+// for one shot user revisions
 export async function runRevisionPipeline({
   userId,
   sessionId,
@@ -170,18 +170,33 @@ export async function runRevisionPipeline({
   const clientOpenAI = getOpenAIClient();
 
   // get user info
+  const userData = await getUserData(userId);
+  if (!userData) {
+    throw new Error(`User with id ${userId} not found.`);
+  }
 
-  // // generate the revised draft
-  // const revisedDraft = await userRevisionAgent(
-  //   clientOpenAI,
-  //   conversationId,
-  //   feedback,
-  // );
-  // // generate the draft name from revision
-  // const draftName = await revisionDraftNamingAgent(
-  //   clientOpenAI,
-  //   conversationId,
-  //   feedback,
-  // );
-  // return { revisedDraft, draftName };
+  // retrieve data from session
+  const session = await getCoverLetterSession(userId, sessionId);
+
+  // generate the revised draft
+  const revisedDraft = await userRevisionAgent(
+    clientOpenAI,
+    userData,
+    session.jobData,
+    session.writingAnalysis,
+    session.writingSample,
+    session.currentDraft,
+    feedback,
+  );
+
+  // generate the draft name from revision
+  const draftName = await revisionDraftNamingAgent(clientOpenAI, feedback);
+
+  return {
+    revisedDraft,
+    draftName,
+    jobData: session.jobData,
+    writingAnalysis: session.writingAnalysis,
+    writingSample: session.writingSample,
+  };
 }
