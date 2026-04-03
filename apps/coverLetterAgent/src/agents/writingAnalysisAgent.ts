@@ -13,7 +13,7 @@ import { analyzeWritingQualitative } from "../utils/writing/textMetrics";
 export default async function writingAnalysisAgent(
   clientOpenAI: OpenAI,
   sample: string,
-  isDraft: boolean = false
+  isDraft: boolean = false,
 ): Promise<WritingAnalysis> {
   if (!sample.trim()) {
     throw new Error("Writing sample is empty");
@@ -50,13 +50,12 @@ export default async function writingAnalysisAgent(
   `.trim();
 
   // quantitative analysis
-  const quantMetrics: QuantitativeMetrics = await analyzeWritingQualitative(
-    sample
-  );
+  const quantMetrics: QuantitativeMetrics =
+    await analyzeWritingQualitative(sample);
 
   // qualitative analysis
   const response = await clientOpenAI.chat.completions.create({
-    model: "gpt-4.1",
+    model: "gpt-5.4-mini",
     messages: [{ role: "user", content: prompt }],
     temperature: 0,
   });

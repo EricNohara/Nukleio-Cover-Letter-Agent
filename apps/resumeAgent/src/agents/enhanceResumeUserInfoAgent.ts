@@ -327,7 +327,7 @@ export async function enhanceResumeUserInfoAgent(
   const prompt = buildPrompt(llmInput, targetJobs);
 
   const response = await openAIClient.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-mini",
     input: [
       {
         role: "system",

@@ -215,7 +215,7 @@ export async function userDataFilteringAgent(
   const llmInput = toLLMInput(userData);
 
   const response = await openAiClient.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-mini",
     temperature: 0,
     input: [
       {

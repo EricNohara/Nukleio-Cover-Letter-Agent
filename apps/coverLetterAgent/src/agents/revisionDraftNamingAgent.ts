@@ -32,7 +32,7 @@ export default async function revisionDraftNamingAgent(
   const prompt = buildPrompt(feedback);
 
   const response = await clientOpenAI.responses.create({
-    model: "gpt-5.1",
+    model: "gpt-5.4-nano",
     input: prompt,
     temperature: 0.2,
   });
