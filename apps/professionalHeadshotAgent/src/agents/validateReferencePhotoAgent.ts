@@ -24,25 +24,31 @@ function buildPrompt() {
   return `
     You are validating an uploaded image to see if its suitable as a reference photo for generating a realistic professional headshot.
 
-    Evaluate the image conservatively.
+    Be permissive. Only fail the image if it is truly unusable or unsafe.
+    The image does NOT need to already look professional. Casual selfies, imperfect lighting, non-professional backgrounds, off-center framing, and minor blur are acceptable.
 
     Fill out the provided reference_photo_validation JSON with your scoring of the reference image.
 
     Add to failureReasons if any of these are true:
     - no person is visible
-    - more than one person is visible
-    - face is mostly hidden
-    - face is heavily cropped
-    - image is extremely blurry
-    - image is too low-quality to preserve identity
-    - image is not a real photo
+    - more than one person is clearly centered and visible
+    - the face is not visible enough to preserve identity
+    - the face is so heavily cropped that key identity features are missing
+    - the image is extremely blurry or extremely low resolution
+    - the image is not a real photo, such as a drawing, cartoon, avatar, render, or screenshot
+    - the image contains NSFW content
 
-    Warnings are allowed for softer issues:
-    - slight blur
-    - not fully facing camera
+    Add warnings for fixable or soft issues:
+    - casual photo
+    - messy or non-professional background
     - mediocre lighting
-    - slight occlusion
-    - slightly off-center framing
+    - slight blur
+    - face slightly cropped
+    - not fully facing camera
+    - not looking directly at camera
+    - glasses, hat, or mild occlusion
+    - off-center framing
+    - lower image quality, but still usable
 
     Return strict JSON with:
     - failureReasons
@@ -118,7 +124,7 @@ export async function validateReferencePhotoAgent(
               properties: {
                 personCount: { type: "number" },
                 faceVisible: { type: "boolean" },
-                faceCropped: { type: "boolean" },
+                faceTooCropped: { type: "boolean" },
                 lookingAtCamera: { type: "boolean" },
                 nonPhotographic: { type: "boolean" },
                 nsfwContent: { type: "boolean" },
@@ -127,7 +133,7 @@ export async function validateReferencePhotoAgent(
               required: [
                 "personCount",
                 "faceVisible",
-                "faceCropped",
+                "faceTooCropped",
                 "lookingAtCamera",
                 "nonPhotographic",
                 "nsfwContent",
