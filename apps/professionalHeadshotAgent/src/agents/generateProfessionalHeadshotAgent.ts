@@ -15,6 +15,7 @@ function buildPrompt(
         Improve lighting, polish, and professionalism while keeping the subject natural.
         The output should look like a high-quality corporate or LinkedIn-style headshot.
         There should only be a single subject in the final image.
+        The subject's face and head should be entirely within view.
         Do not add extra people, extra limbs, text, watermarks, or distortions.
     `.trim();
   }
@@ -27,6 +28,7 @@ function buildPrompt(
     Background setting: ${backgroundDescription ?? "professional neutral studio background"}.
     The output should look like a high-quality corporate or LinkedIn-style headshot.
     There should only be a single subject in the final image.
+    The subject's face and head should be entirely within view.
     Do not add extra people, extra limbs, text, watermarks, or distortions.
 `.trim();
 }
