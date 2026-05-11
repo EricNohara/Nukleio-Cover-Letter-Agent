@@ -74,9 +74,18 @@ function buildPrompt(
       Improve lighting, polish, and professionalism while keeping the subject natural.
       The output should look like a high-quality corporate or LinkedIn-style headshot.
       There should only be a single subject in the final image.
+      The final image should use professional headshot composition.
+      Straighten the subject's head and posture if necessary.
+      The face should appear naturally upright and centered.
+      Correct minor camera tilt or subject tilt from the reference image.
+      The shoulders should appear level and balanced.
+      The camera framing should feel symmetrical and professional.
+      Use realistic portrait alignment similar to a LinkedIn or corporate studio headshot.
+      Avoid awkward leaning, tilted posture, or off-angle composition unless explicitly requested.
       The subject's face and head should be entirely within view.
       Keep the clothing realistic and anatomically consistent.
       Do not preserve the original outfit unless it already matches the requested attire.
+      Do not preserve accidental tilt, slouching, or asymmetrical framing from the reference image.
       Do not change the person's body type, age, gender presentation, or facial identity.
       Do not add extra people, extra limbs, text, watermarks, or distortions.
     `.trim();
@@ -95,9 +104,18 @@ function buildPrompt(
     Improve lighting, polish, and professionalism while keeping the subject natural.
     The output should look like a high-quality corporate or LinkedIn-style headshot.
     There should only be a single subject in the final image.
+    The final image should use professional headshot composition.
+    Straighten the subject's head and posture if necessary.
+    The face should appear naturally upright and centered.
+    Correct minor camera tilt or subject tilt from the reference image.
+    The shoulders should appear level and balanced.
+    The camera framing should feel symmetrical and professional.
+    Use realistic portrait alignment similar to a LinkedIn or corporate studio headshot.
+    Avoid awkward leaning, tilted posture, or off-angle composition unless explicitly requested.
     The subject's face and head should be entirely within view.
     Keep the clothing realistic and anatomically consistent.
     Do not preserve the original outfit unless it already matches the requested attire.
+    Do not preserve accidental tilt, slouching, or asymmetrical framing from the reference image.
     Do not change the person's body type, age, gender presentation, or facial identity.
     Do not add extra people, extra limbs, text, watermarks, or distortions.
   `.trim();
