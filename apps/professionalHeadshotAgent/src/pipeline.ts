@@ -1,4 +1,7 @@
-import { generateProfessionalHeadshotAgent } from "./agents/generateProfessionalHeadshotAgent";
+import {
+  generateProfessionalHeadshotAgent,
+  HeadshotAttire,
+} from "./agents/generateProfessionalHeadshotAgent";
 import {
   ReferencePhotoValidationResult,
   validateReferencePhotoAgent,
@@ -13,11 +16,13 @@ export async function runPipeline({
   referenceUrl,
   backgroundDescription,
   backgroundUrl,
+  attire,
   layout,
 }: {
   referenceUrl: string;
   backgroundDescription: string | null;
   backgroundUrl?: string | undefined;
+  attire: HeadshotAttire;
   layout: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 }) {
   // validate the reference image
@@ -38,6 +43,7 @@ export async function runPipeline({
     openAIClient,
     referenceUrl,
     backgroundDescription,
+    attire,
     layout,
     backgroundUrl,
   );

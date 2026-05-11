@@ -10,10 +10,21 @@ const headshotSizeSchema = z.enum([
   "auto",
 ]);
 
+const headshotAttireSchema = z.enum([
+  "auto",
+  "business",
+  "businessCasual",
+  "smartCasual",
+  "casual",
+  "techProfessional",
+  "academic",
+]);
+
 const generateProfessionalHeadshotSchema = z.object({
   referenceUrl: z.string(),
   backgroundDescription: z.string().nullable(),
   backgroundUrl: z.string().optional(),
+  attire: headshotAttireSchema,
   layout: headshotSizeSchema,
 });
 
