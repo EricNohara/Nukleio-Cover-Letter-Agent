@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { IUserInfo } from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
 
 type MatchBreakdownLLM = {
@@ -91,10 +91,10 @@ function buildPrompt(): string {
   `.trim();
 }
 
-function buildDataMessage(userData: IUserInfo, jobData: IJobInfo): string {
+function buildDataMessage(userInfo: IUserInfo, jobData: IJobInfo): string {
   return [
     "USER_DATA:",
-    JSON.stringify(userData, null, 2),
+    JSON.stringify(userInfo, null, 2),
     "",
     "JOB_DATA:",
     JSON.stringify(jobData, null, 2),
@@ -103,7 +103,7 @@ function buildDataMessage(userData: IUserInfo, jobData: IJobInfo): string {
 
 export default async function skillsMatchEvaluatorAgent(
   clientOpenAI: OpenAI,
-  userData: IUserInfo,
+  userInfo: IUserInfo,
   jobData: IJobInfo,
 ): Promise<MatchBreakdown> {
   const response = await clientOpenAI.responses.create({
@@ -124,7 +124,7 @@ export default async function skillsMatchEvaluatorAgent(
         content: [
           {
             type: "input_text",
-            text: buildDataMessage(userData, jobData),
+            text: buildDataMessage(userInfo, jobData),
           },
         ],
       },

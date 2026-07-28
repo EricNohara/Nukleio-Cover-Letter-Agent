@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { IDraftEvaluationResult } from "../interfaces/IEvaluator";
 import { WritingAnalysis } from "../utils/writing/writingSchema";
-import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { IUserInfo } from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
 
 function buildPrompt(writingAnalysis: WritingAnalysis | null) {
@@ -39,7 +39,7 @@ ${
 function buildDataMessage(
   feedback: IDraftEvaluationResult,
   draft: string,
-  userData: IUserInfo,
+  userInfo: IUserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string,
@@ -52,7 +52,7 @@ function buildDataMessage(
     JSON.stringify(feedback, null, 2),
     "",
     "USER_DATA:",
-    JSON.stringify(userData, null, 2),
+    JSON.stringify(userInfo, null, 2),
     "",
     "JOB_DATA:",
     JSON.stringify(jobData, null, 2),
@@ -69,7 +69,7 @@ export default async function revisionAgent(
   clientOpenAI: OpenAI,
   feedback: IDraftEvaluationResult,
   draft: string,
-  userData: IUserInfo,
+  userInfo: IUserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string,
@@ -95,7 +95,7 @@ export default async function revisionAgent(
             text: buildDataMessage(
               feedback,
               draft,
-              userData,
+              userInfo,
               jobData,
               writingAnalysis,
               writingSample,

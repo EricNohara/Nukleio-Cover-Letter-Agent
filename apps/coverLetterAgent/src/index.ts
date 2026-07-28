@@ -2,9 +2,11 @@ import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { runPipeline, runRevisionPipeline } from "./pipeline";
 
 import { z } from "zod";
+import { userInfoSchema } from "./interfaces/IUserInfo";
 
 const generateCoverLetterSchema = z.object({
   userId: z.string(),
+  userInfo: userInfoSchema,
   jobTitle: z.string(),
   companyName: z.string(),
   jobDescriptionDump: z.string(),
@@ -13,6 +15,7 @@ const generateCoverLetterSchema = z.object({
 
 const reviseSchema = z.object({
   userId: z.string(),
+  userInfo: userInfoSchema,
   // db session with data from the generation
   sessionId: z.string(),
   feedback: z.string(),

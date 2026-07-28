@@ -1,8 +1,6 @@
-import getUserData from "./utils/nukleio/getUserData";
 import writingAnalysisAgent from "./agents/writingAnalysisAgent";
 import { WritingAnalysis } from "./utils/writing/writingSchema";
 import getOpenAIClient from "./utils/ai/getOpenAIClient";
-import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import firstDraftAgent from "./agents/firstDraftAgent";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
 import draftEvaluatorAgent from "./agents/draftEvaluatorAgent";
@@ -13,19 +11,20 @@ import jobResearchAgent from "./agents/jobResearchAgent";
 import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
 import { IJobInfo } from "./interfaces/IJobInfo";
-import { userDataFilteringAgent } from "./agents/userDataFilteringAgent";
+import { userInfoFilteringAgent } from "./agents/userInfoFilteringAgent";
 import { getCoverLetterSession } from "./utils/nukleio/getCoverLetterSession";
+import { IUserInfo } from "./interfaces/IUserInfo";
 
 const MAX_ITERATIONS = 2;
 
 async function runCorePipeline({
   clientOpenAI,
-  userData,
+  userInfo,
   jobData,
   writingSample,
 }: {
   clientOpenAI: OpenAI;
-  userData: IUserInfo;
+  userInfo: IUserInfo;
   jobData: IJobInfo;
   writingSample?: string | undefined;
 }) {
@@ -41,7 +40,7 @@ async function runCorePipeline({
   // invoke cover letter first draft agent
   let currentDraft: string = await firstDraftAgent(
     clientOpenAI,
-    userData,
+    userInfo,
     jobData,
     writingAnalysis,
     writingSample,
@@ -55,7 +54,7 @@ async function runCorePipeline({
     lastEvaluation = await draftEvaluatorAgent(
       clientOpenAI,
       currentDraft,
-      userData,
+      userInfo,
       jobData,
       writingAnalysis,
       writingSample,
@@ -83,7 +82,7 @@ async function runCorePipeline({
       clientOpenAI,
       lastEvaluation,
       currentDraft,
-      userData,
+      userInfo,
       jobData,
       writingAnalysis,
       writingSample,
@@ -93,7 +92,7 @@ async function runCorePipeline({
   // calculate skills match score at the end
   const skillsMatchScore = await skillsMatchEvaluatorAgent(
     clientOpenAI,
-    userData,
+    userInfo,
     jobData,
   );
 
@@ -110,12 +109,14 @@ async function runCorePipeline({
 // pipeline for job research agentic workflow
 export async function runPipeline({
   userId,
+  userInfo,
   jobTitle,
   companyName,
   jobDescriptionDump,
   writingSample,
 }: {
   userId: string;
+  userInfo: IUserInfo;
   jobTitle: string;
   companyName: string;
   jobDescriptionDump: string;
@@ -123,12 +124,6 @@ export async function runPipeline({
 }) {
   // get OpenAI Client
   const clientOpenAI = getOpenAIClient();
-
-  // retrieve user data
-  const userData: IUserInfo | null = await getUserData(userId);
-  if (!userData) {
-    throw new Error(`User with id ${userId} not found.`);
-  }
 
   // invoke job research agent
   const jobData: IJobInfo = await jobResearchAgent(
@@ -143,15 +138,15 @@ export async function runPipeline({
   }
 
   // filter user data for the job
-  const filteredUserData: IUserInfo = await userDataFilteringAgent(
+  const filteredUserInfo: IUserInfo = await userInfoFilteringAgent(
     clientOpenAI,
-    userData,
+    userInfo,
     jobData,
   );
 
   return await runCorePipeline({
     clientOpenAI,
-    userData: filteredUserData,
+    userInfo: filteredUserInfo,
     jobData,
     writingSample,
   });
@@ -160,20 +155,16 @@ export async function runPipeline({
 // for one shot user revisions
 export async function runRevisionPipeline({
   userId,
+  userInfo,
   sessionId,
   feedback,
 }: {
   userId: string;
+  userInfo: IUserInfo;
   sessionId: string;
   feedback: string;
 }) {
   const clientOpenAI = getOpenAIClient();
-
-  // get user info
-  const userData = await getUserData(userId);
-  if (!userData) {
-    throw new Error(`User with id ${userId} not found.`);
-  }
 
   // retrieve data from session
   const session = await getCoverLetterSession(userId, sessionId);
@@ -181,7 +172,7 @@ export async function runRevisionPipeline({
   // generate the revised draft
   const revisedDraft = await userRevisionAgent(
     clientOpenAI,
-    userData,
+    userInfo,
     session.jobData,
     session.writingAnalysis,
     session.writingSample,

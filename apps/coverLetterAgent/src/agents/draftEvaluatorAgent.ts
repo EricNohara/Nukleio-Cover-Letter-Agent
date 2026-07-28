@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../interfaces/IUserInfoResponse";
+import { IUserInfo } from "../interfaces/IUserInfo";
 import { objectiveEvaluator } from "../utils/eval/objectiveEvaluator";
 import { WritingAnalysis } from "../utils/writing/writingSchema";
 import {
@@ -15,18 +15,18 @@ import { IJobInfo } from "../interfaces/IJobInfo";
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
   draft: string,
-  userData: IUserInfo,
+  userInfo: IUserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string | undefined,
 ): Promise<IDraftEvaluationResult> {
   const objectiveEvaluation: IObjectiveEvaluationResult =
-    await objectiveEvaluator(draft, userData, jobData);
+    await objectiveEvaluator(draft, userInfo, jobData);
 
   const llmEvaluation: ILlmEvaluationResult = await llmEvaluator(
     clientOpenAI,
     draft,
-    userData,
+    userInfo,
     jobData,
     writingAnalysis,
     writingSample,

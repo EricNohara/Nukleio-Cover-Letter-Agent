@@ -5,7 +5,7 @@ import {
   IUserEducation,
   IUserExperience,
   IUserProject,
-} from "../interfaces/IUserInfoResponse";
+} from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
 
 type FilterLimits = {
@@ -141,10 +141,10 @@ Selection limits:
 `.trim();
 }
 
-function buildDataMessage(userData: LLMInput, jobData: IJobInfo): string {
+function buildDataMessage(userInfo: LLMInput, jobData: IJobInfo): string {
   return [
     "USER_DATA:",
-    JSON.stringify(userData, null, 2),
+    JSON.stringify(userInfo, null, 2),
     "",
     "JOB_DATA:",
     JSON.stringify(jobData, null, 2),
@@ -207,12 +207,12 @@ function mergeFilteredContent(
   };
 }
 
-export async function userDataFilteringAgent(
+export async function userInfoFilteringAgent(
   openAiClient: OpenAI,
-  userData: IUserInfo,
+  userInfo: IUserInfo,
   jobData: IJobInfo,
 ): Promise<IUserInfo> {
-  const llmInput = toLLMInput(userData);
+  const llmInput = toLLMInput(userInfo);
 
   const response = await openAiClient.responses.create({
     model: "gpt-5.4-mini",
@@ -324,5 +324,5 @@ export async function userDataFilteringAgent(
   const parsed = filteredUserContentSchema.parse(JSON.parse(raw));
   const constrained = enforceHardLimits(parsed);
 
-  return mergeFilteredContent(userData, constrained);
+  return mergeFilteredContent(userInfo, constrained);
 }
