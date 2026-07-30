@@ -43,11 +43,3 @@ export const userInfoSchema = z.object({
     )
     .optional(),
 });
-
-export type IUserInfo = z.infer<typeof userInfoSchema>;
-
-export type IUserExperience = NonNullable<IUserInfo["experiences"]>[number];
-
-export type IUserProject = NonNullable<IUserInfo["projects"]>[number];
-
-export type IUserEducation = NonNullable<IUserInfo["education"]>[number];

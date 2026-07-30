@@ -1,5 +1,5 @@
 import writingAnalysisAgent from "./agents/writingAnalysisAgent";
-import { WritingAnalysis } from "./utils/writing/writingSchema";
+import { WritingAnalysis } from "./types/writingAnalysis";
 import getOpenAIClient from "./utils/ai/getOpenAIClient";
 import firstDraftAgent from "./agents/firstDraftAgent";
 import { IDraftEvaluationResult } from "./interfaces/IEvaluator";
@@ -12,8 +12,8 @@ import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
 import { IJobInfo } from "./interfaces/IJobInfo";
 import { userInfoFilteringAgent } from "./agents/userInfoFilteringAgent";
-import { getCoverLetterSession } from "./utils/nukleio/getCoverLetterSession";
 import { IUserInfo } from "./interfaces/IUserInfo";
+import { CoverLetterSession } from "./types/coverLetterSession";
 
 const MAX_ITERATIONS = 2;
 
@@ -154,20 +154,15 @@ export async function runPipeline({
 
 // for one shot user revisions
 export async function runRevisionPipeline({
-  userId,
   userInfo,
-  sessionId,
+  session,
   feedback,
 }: {
-  userId: string;
   userInfo: IUserInfo;
-  sessionId: string;
+  session: CoverLetterSession;
   feedback: string;
 }) {
   const clientOpenAI = getOpenAIClient();
-
-  // retrieve data from session
-  const session = await getCoverLetterSession(userId, sessionId);
 
   // generate the revised draft
   const revisedDraft = await userRevisionAgent(

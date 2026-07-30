@@ -1,4 +1,4 @@
-import { WritingAnalysis } from "../utils/writing/writingSchema";
+import { WritingAnalysis } from "../types/writingAnalysis";
 import { IJobInfo } from "./IJobInfo";
 
 export interface ICoverLetterSession {

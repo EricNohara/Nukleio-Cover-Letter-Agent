@@ -1,10 +1,10 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
-import { WritingAnalysis } from "../utils/writing/writingSchema";
+import { WritingAnalysis } from "../types/writingAnalysis";
+import { UserInfo } from "../types/userInfo";
 
 function buildPrompt(
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample: string | null,
@@ -63,7 +63,7 @@ function buildPrompt(
 
 export default async function userRevisionAgent(
   clientOpenAI: OpenAI,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample: string | null,

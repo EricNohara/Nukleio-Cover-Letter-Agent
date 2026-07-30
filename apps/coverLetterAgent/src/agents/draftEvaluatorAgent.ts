@@ -1,7 +1,6 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../interfaces/IUserInfo";
 import { objectiveEvaluator } from "../utils/eval/objectiveEvaluator";
-import { WritingAnalysis } from "../utils/writing/writingSchema";
+import { WritingAnalysis } from "../types/writingAnalysis";
 import {
   IDraftEvaluationResult,
   ILlmEvaluationResult,
@@ -11,11 +10,12 @@ import {
 import llmEvaluator from "../utils/eval/llmEvaluator";
 import writingStyleEvaluator from "../utils/eval/writingStyleEvaluator";
 import { IJobInfo } from "../interfaces/IJobInfo";
+import { UserInfo } from "../types/userInfo";
 
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
   draft: string,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string | undefined,

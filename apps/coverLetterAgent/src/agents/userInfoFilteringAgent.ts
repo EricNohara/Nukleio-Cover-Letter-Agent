@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import {
-  IUserInfo,
-  IUserEducation,
-  IUserExperience,
-  IUserProject,
-} from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
+import {
+  UserEducation,
+  UserExperience,
+  UserInfo,
+  UserProject,
+} from "../types/userInfo";
 
 type FilterLimits = {
   maxSkills?: number;
@@ -89,7 +89,7 @@ const filteredUserContentSchema = z
 
 type FilteredUserContent = z.infer<typeof filteredUserContentSchema>;
 
-function toLLMInput(userInfo: IUserInfo): LLMInput {
+function toLLMInput(userInfo: UserInfo): LLMInput {
   return {
     skills: userInfo.skills ?? [],
     experiences: (userInfo.experiences ?? []).map((experience) => ({
@@ -174,9 +174,9 @@ function enforceHardLimits(data: FilteredUserContent): FilteredUserContent {
 }
 
 function mergeFilteredContent(
-  original: IUserInfo,
+  original: UserInfo,
   filtered: FilteredUserContent,
-): IUserInfo {
+): UserInfo {
   return {
     name: original.name,
     email: original.email,
@@ -192,26 +192,26 @@ function mergeFilteredContent(
       : {}),
 
     skills: filtered.skills,
-    experiences: filtered.experiences as IUserExperience[],
+    experiences: filtered.experiences as UserExperience[],
     projects: filtered.projects.map((project) => ({
       name: project.name,
       ...(project.tech ? { tech: project.tech } : {}),
       description: project.description,
-    })) as IUserProject[],
+    })) as UserProject[],
     education: filtered.education.map((edu) => ({
       degree: edu.degree,
       institution: edu.institution,
       ...(edu.fields_of_study ? { fields_of_study: edu.fields_of_study } : {}),
       ...(edu.courses ? { courses: edu.courses } : {}),
-    })) as IUserEducation[],
+    })) as UserEducation[],
   };
 }
 
 export async function userInfoFilteringAgent(
   openAiClient: OpenAI,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
-): Promise<IUserInfo> {
+): Promise<UserInfo> {
   const llmInput = toLLMInput(userInfo);
 
   const response = await openAiClient.responses.create({

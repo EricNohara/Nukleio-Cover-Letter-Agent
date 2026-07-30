@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { IUserInfo } from "../interfaces/IUserInfo";
 import { IJobInfo } from "../interfaces/IJobInfo";
+import { UserInfo } from "../types/userInfo";
 
 type MatchBreakdownLLM = {
   education: number;
@@ -91,7 +91,7 @@ function buildPrompt(): string {
   `.trim();
 }
 
-function buildDataMessage(userInfo: IUserInfo, jobData: IJobInfo): string {
+function buildDataMessage(userInfo: UserInfo, jobData: IJobInfo): string {
   return [
     "USER_DATA:",
     JSON.stringify(userInfo, null, 2),
@@ -103,7 +103,7 @@ function buildDataMessage(userInfo: IUserInfo, jobData: IJobInfo): string {
 
 export default async function skillsMatchEvaluatorAgent(
   clientOpenAI: OpenAI,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
 ): Promise<MatchBreakdown> {
   const response = await clientOpenAI.responses.create({

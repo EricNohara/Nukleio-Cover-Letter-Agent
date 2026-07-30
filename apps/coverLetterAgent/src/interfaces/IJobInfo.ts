@@ -1,31 +1,5 @@
-export interface IJobInfoLlmResponse {
-  work_mode?: "remote" | "hybrid" | "onsite";
-  locations?: string[];
-  qualifications?: string[];
-  responsibilities?: string[];
-  technologies?: string[];
-  company?: {
-    industry?: string;
-    company_summary?: string;
-  };
-  hiring_team?: {
-    name?: string;
-  }[];
-}
+import { JobInfo, JobInfoLlmResponse } from "../types/jobInfo";
 
-export interface IJobInfo {
-  work_mode?: "remote" | "hybrid" | "onsite";
-  locations?: string[];
-  qualifications?: string[];
-  responsibilities?: string[];
-  technologies?: string[];
-  job_title: string;
-  company: {
-    name: string;
-    industry?: string;
-    company_summary?: string;
-  };
-  hiring_team?: {
-    name?: string;
-  }[];
-}
+export type IJobInfoLlmResponse = JobInfoLlmResponse;
+
+export type IJobInfo = JobInfo;

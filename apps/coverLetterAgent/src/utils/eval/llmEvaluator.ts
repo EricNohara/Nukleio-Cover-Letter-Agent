@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 import { ILlmEvaluationResult } from "../../interfaces/IEvaluator";
-import { WritingAnalysis } from "../writing/writingSchema";
-import { IUserInfo } from "../../interfaces/IUserInfo";
+import { WritingAnalysis } from "../../types/writingAnalysis";
 import { IJobInfo } from "../../interfaces/IJobInfo";
+import { UserInfo } from "../../types/userInfo";
 
 type CompactEval = {
   s: number;
@@ -76,7 +76,7 @@ function mapCompactEval(result: CompactEval): ILlmEvaluationResult {
 export default async function llmEvaluator(
   clientOpenAI: OpenAI,
   draft: string,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string,

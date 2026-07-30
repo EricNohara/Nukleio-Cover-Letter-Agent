@@ -1,7 +1,7 @@
 import OpenAI from "openai";
-import { WritingAnalysis } from "../utils/writing/writingSchema";
-import { IUserInfo } from "../interfaces/IUserInfo";
+import { WritingAnalysis } from "../types/writingAnalysis";
 import { IJobInfo } from "../interfaces/IJobInfo";
+import { UserInfo } from "../types/userInfo";
 
 function generatePrompt(writingAnalysis: WritingAnalysis | null) {
   return `
@@ -32,7 +32,7 @@ ${writingAnalysis ? "- Match the writing style to the WRITING_SAMPLE and WRITING
 }
 
 function buildDataMessage(
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string,
@@ -54,7 +54,7 @@ function buildDataMessage(
 
 export default async function firstDraftAgent(
   clientOpenAI: OpenAI,
-  userInfo: IUserInfo,
+  userInfo: UserInfo,
   jobData: IJobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string,
