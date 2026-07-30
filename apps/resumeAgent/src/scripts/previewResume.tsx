@@ -485,49 +485,8 @@ export const mockUserInfo: UserInfo = {
   current_position: "Software developer",
 };
 
-const educationIds = undefined;
-
-const courseIds = [
-  "7516aef9-92a6-4bbf-aacf-55f0f9ce3b90",
-  "54cc554d-6064-4181-b747-938920b1fefc",
-  "97ea526b-d524-4708-97ff-7984ee88276d",
-  "4c797477-9f5f-46d1-a308-44e4891768b0",
-  "7065817b-8d9b-431f-8641-e212bcd92966",
-  "6fdcaa39-a25d-4a5d-bef0-2901ce303df4",
-  "113df929-2bfd-4747-ba26-02c8ce0a0f2b",
-  "f78b0b03-c428-4a27-b58f-d9ac23690064",
-];
-
-const experienceIds = [
-  "f310f6c0-23a8-421d-ab5e-eff707c62801",
-  "1b853bb4-259c-4ba8-8811-94f28902ac78",
-];
-
-const projectIds = [
-  "7336ee41-e866-48dc-bb3a-57e93804fd93",
-  "5c8d81c4-bf55-4429-9b3e-e9a4bc1693d8",
-];
-
-const skillIds = [
-  "6a308865-8d81-410b-a7e3-838ddd414d79",
-  "4b106ca4-9657-43dd-8dff-a1e8ec9c092e",
-  "d53988c4-42d1-4833-af66-6e9cb6ebe37b",
-  "fa9932f6-b145-4b7d-ba04-8600cbd960de",
-  "a4351173-5075-4acf-810e-713c346c5b72",
-  "97340c09-72e0-4451-bcc6-f47a24b096dd",
-  "ed6244d7-14ee-45d0-85c7-50c829eb2e33",
-  "556c4d0c-4cad-4c14-9d1b-8aaf25a278a7",
-];
-
 // normalize
-const userInfo = cleanUserInfo(
-  mockUserInfo,
-  educationIds,
-  courseIds,
-  experienceIds,
-  projectIds,
-  skillIds
-);
+const userInfo = cleanUserInfo(mockUserInfo);
 
 // render HTML
 const html =
