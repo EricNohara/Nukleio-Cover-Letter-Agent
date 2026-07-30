@@ -1,21 +1,19 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { runGeneratePipeline, runGenerateWithAiPipeline } from "./pipeline";
 import { z } from "zod";
+import { userInfoSchema } from "./schemas/userInfoSchema";
 
 const generateResumeSchema = z.object({
   userId: z.string(),
+  // with pre filtered fields
+  userInfo: userInfoSchema,
   templateId: z.string().optional(),
-  // to include in the resume - if not provided, include all
-  educationIds: z.array(z.string()).optional(),
-  experienceIds: z.array(z.string()).optional(),
-  courseIds: z.array(z.string()).optional(),
-  projectIds: z.array(z.string()).optional(),
-  skillIds: z.array(z.string()).optional(),
 });
 
 // enhance the user info intelligently and output a template
 const generateResumeWithAiSchema = z.object({
   userId: z.string(),
+  userInfo: userInfoSchema,
   templateId: z.string().optional(),
   // list of job types the user is trying to land
   targetJobs: z.array(z.string()).optional(),

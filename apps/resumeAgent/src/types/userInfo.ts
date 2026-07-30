@@ -10,3 +10,5 @@ export type UserExperience = NonNullable<UserInfo["experiences"]>[number];
 export type UserProject = NonNullable<UserInfo["projects"]>[number];
 
 export type UserEducation = NonNullable<UserInfo["education"]>[number];
+
+export type UserCourse = NonNullable<UserEducation["courses"]>[number];
