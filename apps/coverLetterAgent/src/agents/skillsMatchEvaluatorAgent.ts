@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { IJobInfo } from "../interfaces/IJobInfo";
 import { UserInfo } from "../types/userInfo";
+import { JobInfo } from "../types/jobInfo";
 
 type MatchBreakdownLLM = {
   education: number;
@@ -91,7 +91,7 @@ function buildPrompt(): string {
   `.trim();
 }
 
-function buildDataMessage(userInfo: UserInfo, jobData: IJobInfo): string {
+function buildDataMessage(userInfo: UserInfo, jobData: JobInfo): string {
   return [
     "USER_DATA:",
     JSON.stringify(userInfo, null, 2),
@@ -104,7 +104,7 @@ function buildDataMessage(userInfo: UserInfo, jobData: IJobInfo): string {
 export default async function skillsMatchEvaluatorAgent(
   clientOpenAI: OpenAI,
   userInfo: UserInfo,
-  jobData: IJobInfo,
+  jobData: JobInfo,
 ): Promise<MatchBreakdown> {
   const response = await clientOpenAI.responses.create({
     model: "gpt-5.4-mini",

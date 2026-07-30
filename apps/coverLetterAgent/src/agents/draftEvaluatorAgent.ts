@@ -9,14 +9,14 @@ import {
 } from "../interfaces/IEvaluator";
 import llmEvaluator from "../utils/eval/llmEvaluator";
 import writingStyleEvaluator from "../utils/eval/writingStyleEvaluator";
-import { IJobInfo } from "../interfaces/IJobInfo";
 import { UserInfo } from "../types/userInfo";
+import { JobInfo } from "../types/jobInfo";
 
 export default async function draftEvaluatorAgent(
   clientOpenAI: OpenAI,
   draft: string,
   userInfo: UserInfo,
-  jobData: IJobInfo,
+  jobData: JobInfo,
   writingAnalysis: WritingAnalysis | null,
   writingSample?: string | undefined,
 ): Promise<IDraftEvaluationResult> {

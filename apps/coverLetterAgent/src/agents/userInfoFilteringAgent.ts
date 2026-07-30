@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { IJobInfo } from "../interfaces/IJobInfo";
 import {
   UserEducation,
   UserExperience,
   UserInfo,
   UserProject,
 } from "../types/userInfo";
+import { JobInfo } from "../types/jobInfo";
 
 type FilterLimits = {
   maxSkills?: number;
@@ -141,7 +141,7 @@ Selection limits:
 `.trim();
 }
 
-function buildDataMessage(userInfo: LLMInput, jobData: IJobInfo): string {
+function buildDataMessage(userInfo: LLMInput, jobData: JobInfo): string {
   return [
     "USER_DATA:",
     JSON.stringify(userInfo, null, 2),
@@ -210,7 +210,7 @@ function mergeFilteredContent(
 export async function userInfoFilteringAgent(
   openAiClient: OpenAI,
   userInfo: UserInfo,
-  jobData: IJobInfo,
+  jobData: JobInfo,
 ): Promise<UserInfo> {
   const llmInput = toLLMInput(userInfo);
 

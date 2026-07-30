@@ -10,10 +10,10 @@ import OpenAI from "openai";
 import jobResearchAgent from "./agents/jobResearchAgent";
 import skillsMatchEvaluatorAgent from "./agents/skillsMatchEvaluatorAgent";
 import revisionDraftNamingAgent from "./agents/revisionDraftNamingAgent";
-import { IJobInfo } from "./interfaces/IJobInfo";
 import { userInfoFilteringAgent } from "./agents/userInfoFilteringAgent";
-import { IUserInfo } from "./interfaces/IUserInfo";
 import { CoverLetterSession } from "./types/coverLetterSession";
+import { UserInfo } from "./types/userInfo";
+import { JobInfo } from "./types/jobInfo";
 
 const MAX_ITERATIONS = 2;
 
@@ -24,8 +24,8 @@ async function runCorePipeline({
   writingSample,
 }: {
   clientOpenAI: OpenAI;
-  userInfo: IUserInfo;
-  jobData: IJobInfo;
+  userInfo: UserInfo;
+  jobData: JobInfo;
   writingSample?: string | undefined;
 }) {
   // invoke writing analysis agent
@@ -116,7 +116,7 @@ export async function runPipeline({
   writingSample,
 }: {
   userId: string;
-  userInfo: IUserInfo;
+  userInfo: UserInfo;
   jobTitle: string;
   companyName: string;
   jobDescriptionDump: string;
@@ -126,7 +126,7 @@ export async function runPipeline({
   const clientOpenAI = getOpenAIClient();
 
   // invoke job research agent
-  const jobData: IJobInfo = await jobResearchAgent(
+  const jobData: JobInfo = await jobResearchAgent(
     clientOpenAI,
     jobDescriptionDump,
     jobTitle,
@@ -138,7 +138,7 @@ export async function runPipeline({
   }
 
   // filter user data for the job
-  const filteredUserInfo: IUserInfo = await userInfoFilteringAgent(
+  const filteredUserInfo: UserInfo = await userInfoFilteringAgent(
     clientOpenAI,
     userInfo,
     jobData,
@@ -158,7 +158,7 @@ export async function runRevisionPipeline({
   session,
   feedback,
 }: {
-  userInfo: IUserInfo;
+  userInfo: UserInfo;
   session: CoverLetterSession;
   feedback: string;
 }) {

@@ -1,11 +1,11 @@
 import { IObjectiveEvaluationResult } from "../../interfaces/IEvaluator";
-import { IJobInfo } from "../../interfaces/IJobInfo";
+import { JobInfo } from "../../types/jobInfo";
 import { UserInfo } from "../../types/userInfo";
 
 export async function objectiveEvaluator(
   draft: string,
   userInfo: UserInfo,
-  jobData: IJobInfo,
+  jobData: JobInfo,
 ): Promise<IObjectiveEvaluationResult> {
   const issues: string[] = [];
 
