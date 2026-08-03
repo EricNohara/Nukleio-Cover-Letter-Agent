@@ -8,7 +8,7 @@ const headshotSizeSchema = z.enum([
   "1536x1024",
   "1024x1536",
   "auto",
-]);
+]).default("1024x1024");
 
 const headshotAttireSchema = z.enum([
   "auto",
