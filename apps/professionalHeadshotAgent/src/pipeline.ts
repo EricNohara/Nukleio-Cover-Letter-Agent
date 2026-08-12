@@ -13,12 +13,14 @@ import { reviseProfessionalHeadshotAgent } from "./agents/reviseProfessionalHead
 const openAIClient = getOpenAIClient();
 
 export async function runPipeline({
+  userId,
   referenceUrl,
   backgroundDescription,
   backgroundUrl,
   attire,
   layout,
 }: {
+  userId: string;
   referenceUrl: string;
   backgroundDescription: string | null;
   backgroundUrl?: string | undefined;
@@ -63,7 +65,7 @@ export async function runPipeline({
   const imageBuffer = Buffer.from(b64Image, "base64");
 
   const publicUrl = await uploadHeadshotToSupabase(imageBuffer, {
-    prefix: "generated",
+    userId,
     contentType: "image/jpeg",
   });
 
@@ -76,10 +78,12 @@ export async function runPipeline({
 }
 
 export async function runRevisionPipeline({
+  userId,
   headshotUrl,
   feedback,
   layout,
 }: {
+  userId: string;
   headshotUrl: string;
   feedback: string;
   layout: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
@@ -120,7 +124,7 @@ export async function runRevisionPipeline({
   const imageBuffer = Buffer.from(b64Image, "base64");
 
   const publicUrl = await uploadHeadshotToSupabase(imageBuffer, {
-    prefix: "generated",
+    userId,
     contentType: "image/jpeg",
   });
 

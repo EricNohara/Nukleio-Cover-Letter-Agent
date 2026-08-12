@@ -21,6 +21,7 @@ const headshotAttireSchema = z.enum([
 ]);
 
 const generateProfessionalHeadshotSchema = z.object({
+  userId: z.string().uuid(),
   referenceUrl: z.string(),
   backgroundDescription: z.string().nullable(),
   backgroundUrl: z.string().optional(),
@@ -29,6 +30,7 @@ const generateProfessionalHeadshotSchema = z.object({
 });
 
 const reviseProfessionalHeadshotSchema = z.object({
+  userId: z.string().uuid(),
   headshotUrl: z.string(),
   feedback: z.string(),
   layout: headshotSizeSchema,

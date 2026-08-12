@@ -32,7 +32,7 @@ async function generateResumeFromUserInfoAndTemplate(
   const safePrefix = makeSafePrefix(userInfo.name ?? userInfo.email);
 
   const resumeUrl = await uploadResumeToSupabase(pdfBuffer, {
-    prefix: userId,
+    userId,
     fileNamePrefix: `${safePrefix}-resume`,
     contentType: "application/pdf",
   });

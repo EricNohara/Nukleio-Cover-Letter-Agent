@@ -4,7 +4,7 @@ import { z } from "zod";
 import { userInfoSchema } from "./schemas/userInfoSchema";
 
 const generateResumeSchema = z.object({
-  userId: z.string(),
+  userId: z.string().uuid(),
   // with pre filtered fields
   userInfo: userInfoSchema,
   templateId: z.string().optional(),
@@ -12,7 +12,7 @@ const generateResumeSchema = z.object({
 
 // enhance the user info intelligently and output a template
 const generateResumeWithAiSchema = z.object({
-  userId: z.string(),
+  userId: z.string().uuid(),
   userInfo: userInfoSchema,
   templateId: z.string().optional(),
   // list of job types the user is trying to land
