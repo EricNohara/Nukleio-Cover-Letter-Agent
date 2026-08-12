@@ -287,6 +287,7 @@ Request:
 
 ```ts
 {
+  userId: string; // authenticated Nukleio user UUID
   referenceUrl: string;
   backgroundDescription: string | null;
   backgroundUrl?: string;
@@ -331,11 +332,16 @@ Request:
 
 ```ts
 {
+  userId: string; // authenticated Nukleio user UUID
   headshotUrl: string;
   feedback: string;
   layout: "1024x1024" | "1536x1024" | "1024x1536" | "auto";
 }
 ```
+
+Generated files are stored under `generated/{userId}/` in the configured
+professional-headshots bucket so account-owned outputs can be isolated and
+removed safely.
 
 Success response:
 
