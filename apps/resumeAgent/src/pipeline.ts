@@ -1,10 +1,9 @@
-import getUserData from "./utils/getUserData";
 import { renderResumeHtml } from "./utils/renderResumeHtml";
 import { renderResumePdf } from "./utils/renderResumePdf";
 import { uploadResumeToSupabase } from "./utils/uploadResumeToSupabase";
 import getOpenAIClient from "./utils/getOpenAIClient";
-import { IUserInfo } from "./interfaces/IUserInfoResponse";
 import { enhanceResumeUserInfoAgent } from "./agents/enhanceResumeUserInfoAgent";
+import { UserInfo } from "./types/userInfo";
 
 const openAIClient = getOpenAIClient();
 
@@ -20,8 +19,8 @@ function makeSafePrefix(name: string): string {
 
 async function generateResumeFromUserInfoAndTemplate(
   userId: string,
-  userInfo: IUserInfo,
-  templateId?: string | undefined,
+  userInfo: UserInfo,
+  templateId?: string | undefined
 ) {
   //   render the resume as HTML
   const html = renderResumeHtml(userInfo, templateId);
@@ -33,7 +32,7 @@ async function generateResumeFromUserInfoAndTemplate(
   const safePrefix = makeSafePrefix(userInfo.name ?? userInfo.email);
 
   const resumeUrl = await uploadResumeToSupabase(pdfBuffer, {
-    prefix: userId,
+    userId,
     fileNamePrefix: `${safePrefix}-resume`,
     contentType: "application/pdf",
   });
@@ -43,41 +42,20 @@ async function generateResumeFromUserInfoAndTemplate(
 
 export async function runGeneratePipeline({
   userId,
+  userInfo,
   templateId,
-  educationIds,
-  courseIds,
-  experienceIds,
-  projectIds,
-  skillIds,
 }: {
   userId: string;
+  userInfo: UserInfo;
   templateId?: string | undefined;
-  educationIds?: string[] | undefined;
-  courseIds?: string[] | undefined;
-  experienceIds?: string[] | undefined;
-  projectIds?: string[] | undefined;
-  skillIds?: string[] | undefined;
 }): Promise<{
   success: true;
   resumeUrl: string;
 }> {
-  // fetch user info
-  const userInfo = await getUserData(
-    userId,
-    educationIds,
-    courseIds,
-    experienceIds,
-    projectIds,
-    skillIds,
-  );
-  if (!userInfo) {
-    throw new Error("Error fetching user info");
-  }
-
   const resumeUrl = await generateResumeFromUserInfoAndTemplate(
     userId,
     userInfo,
-    templateId,
+    templateId
   );
 
   if (!resumeUrl) {
@@ -92,31 +70,27 @@ export async function runGeneratePipeline({
 
 export async function runGenerateWithAiPipeline({
   userId,
+  userInfo,
   templateId,
   targetJobs,
 }: {
   userId: string;
+  userInfo: UserInfo;
   templateId?: string | undefined;
   targetJobs?: string[] | undefined;
 }) {
-  // fetch ALL user info
-  const userInfo = await getUserData(userId);
-  if (!userInfo) {
-    throw new Error("Error fetching user info");
-  }
-
   // run the enhancement agent
-  const resumeEnhancedUserInfo: IUserInfo = await enhanceResumeUserInfoAgent(
+  const resumeEnhancedUserInfo: UserInfo = await enhanceResumeUserInfoAgent(
     openAIClient,
     userInfo,
-    targetJobs,
+    targetJobs
   );
 
   // generate the resume
   const resumeUrl = await generateResumeFromUserInfoAndTemplate(
     userId,
     resumeEnhancedUserInfo,
-    templateId,
+    templateId
   );
 
   if (!resumeUrl) {
