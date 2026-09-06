@@ -6,7 +6,9 @@ This repo contains three Lambda-backed agents:
 - Cover Letter Agent
 - Professional Headshot Agent
 
-All agents accept JSON request bodies. Successful responses use HTTP 200. Validation or runtime errors are returned as HTTP 400 with:
+All agents accept JSON request bodies. Successful responses use HTTP 200.
+Invalid JSON/schema input returns HTTP 400, authorization failures return HTTP
+403, and internal runtime failures return HTTP 500 with:
 
 ```ts
 {
@@ -14,6 +16,27 @@ All agents accept JSON request bodies. Successful responses use HTTP 200. Valida
   error: string;
 }
 ```
+
+## Application Authentication
+
+All Function URLs must use the `AWS_IAM` auth type. Calls are made only by the
+Nukleio server and must be signed with AWS Signature Version 4 using service
+name `lambda`. Browsers must never call these endpoints directly.
+
+Each handler also requires AWS IAM caller context from one of the exact ARNs in
+`NUKLEIO_APP_IAM_PRINCIPAL_ARNS`. It validates these signed headers before any
+pipeline or paid provider runs:
+
+- `x-nukleio-user-id`
+- `x-nukleio-operation`
+- `x-nukleio-request-id`
+
+The user ID header must be a UUID and must match `userId` in the JSON body.
+Unauthorized or mismatched requests return HTTP 403. The handlers do not expose
+CORS headers because invocation is server-to-server.
+
+Infrastructure and rollout instructions are maintained in the Nukleio app
+repository at `doc/AI_AGENT_AUTH_SETUP.md`.
 
 Unknown routes return HTTP 404 with:
 
@@ -257,6 +280,7 @@ Request:
 
 ```ts
 {
+  userId: string;
   userInfo: CoverLetterUserInfo;
   session: {
     jobData: JobInfo;
